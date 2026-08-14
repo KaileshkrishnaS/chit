@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!-- Mobile scaling optimization (Requirement 4) -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SK Product | Chit Finance Management</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.474.0/dist/umd/lucide.min.js"></script>
+<style>
+  body{font-family:'Segoe UI',ui-sans-serif,system-ui,sans-serif;background:#f4f6f9}
+  .fade-in{animation:fadeIn .25s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  .modal-backdrop{background:rgba(15,23,42,.55)}
+  .scale-in{animation:scaleIn .18s ease}
+  @keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+  ::-webkit-scrollbar{width:8px;height:8px}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
+  .spinner{border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;width:18px;height:18px;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body class="text-slate-800">
+
+<!-- ======================= CONFIG BANNER ======================= -->
+<div id="configWarning" class="hidden bg-amber-500 text-white text-sm text-center py-2 px-4">
+  ⚠ Set your Apps Script Web App URL in <code>APPS_SCRIPT_URL</code> near the top of this file's script.
+</div>
+
+<!-- ======================= TOASTS ======================= -->
+<div id="toastContainer" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 w-80"></div>
+
+<!-- ======================= LOGIN PAGE ======================= -->
+<div id="loginPage" class="min-h-screen flex items-center justify-center relative overflow-hidden"
+     style="background:radial-gradient(circle at 20% 20%,#1e293b,#0f172a 60%)">
+  <div class="absolute inset-0 opacity-20" style="background-image:radial-gradient(#334155 1px,transparent 1px);background-size:26px 26px"></div>
+  <div class="relative w-full max-w-sm mx-4 fade-in">
+    <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <div class="flex flex-col items-center mb-6">
+        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 to-indigo-800 flex items-center justify-center mb-3 shadow-lg">
+          <i data-lucide="landmark" class="text-white w-7 h-7"></i>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900">SK Product</h1>
+        <p class="text-sm text-slate-400 mt-1">Chit Finance Management</p>
+      </div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="text-xs font-medium text-slate-500">User ID</label>
+          <input id="loginUser" type="text" autocomplete="username" required
+            class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter User ID">
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-500">Password</label>
+          <input id="loginPass" type="password" autocomplete="current-password" required
+            class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••">
+        </div>
+        <p id="loginError" class="hidden text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
+        <button type="submit" id="loginBtn"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 transition text-white font-medium rounded-lg py-3 text-sm flex items-center justify-center gap-2">
+          <span id="loginBtnText">Login</span>
+        </button>
+      </form>
+    </div>
+    <p class="text-center text-slate-500 text-xs mt-4">© SK Product</p>
+  </div>
+</div>
+
+<!-- ======================= APP SHELL ======================= -->
+<div id="appShell" class="hidden min-h-screen">
+  <!-- Top Nav -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2 cursor-pointer" onclick="goGroups()">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-800 flex items-center justify-center">
+          <i data-lucide="landmark" class="text-white w-5 h-5"></i>
+        </div>
+        <span class="font-bold text-slate-900">SK Product</span>
+      </div>
+      <nav class="hidden sm:flex items-center gap-1 text-sm" id="breadcrumbs"></nav>
+      <button onclick="logout()" class="text-sm text-slate-500 hover:text-red-600 flex items-center gap-1 p-2">
+        <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+
+    <!-- ---------- GROUPS PAGE ---------- -->
+    <section id="groupsPage" class="hidden fade-in">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Groups</h2>
+          <p class="text-sm text-slate-500">All chit groups, pulled live from your sheet.</p>
+        </div>
+        <div class="flex gap-2">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+            <input id="groupSearch" oninput="renderGroups()" placeholder="Search groups..."
+              class="pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-lg w-48 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <button onclick="openAddGroupModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Group
+          </button>
+        </div>
+      </div>
+      <div id="groupsLoading" class="text-center py-16 text-slate-400 text-sm">Loading groups...</div>
+      <div id="groupsGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="groupsEmpty" class="hidden text-center py-16">
+        <i data-lucide="folder-open" class="w-10 h-10 mx-auto text-slate-300 mb-3"></i>
+        <p class="text-slate-500 font-medium">No groups yet</p>
+        <p class="text-slate-400 text-sm mb-4">Create your first chit group to get started.</p>
+        <button onclick="openAddGroupModal()" class="bg-indigo-600 text-white text-sm font-medium rounded-lg px-4 py-3">+ Add Group</button>
+      </div>
+    </section>
+
+    <!-- ---------- GROUP MEMBERS PAGE ---------- -->
+    <section id="groupPage" class="hidden fade-in">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 id="groupTitle" class="text-xl font-bold text-slate-900"></h2>
+          <p id="groupAmountText" class="text-indigo-600 font-semibold"></p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="openStatusView()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg px-4 py-2.5 flex items-center gap-1.5">
+            <i data-lucide="pie-chart" class="w-4 h-4"></i> Payment Status
+          </button>
+          <button onclick="openSendCardModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 flex items-center gap-1.5">
+            <i data-lucide="send" class="w-4 h-4"></i> Send Card
+          </button>
+          <button onclick="openAddMemberModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 flex items-center gap-1.5">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Add Member
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mb-4">
+        <div class="relative flex-1 min-w-[200px]">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+          <input id="memberSearch" oninput="renderMembers()" placeholder="Search by name or phone..."
+            class="pl-9 pr-3 py-2.5 text-sm border border-slate-200 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <select id="memberFilter" onchange="renderMembers()" class="border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white">
+          <option value="All">All</option>
+          <option value="Paid">Paid</option>
+          <option value="Unpaid">Unpaid</option>
+        </select>
+      </div>
+
+      <div id="membersLoading" class="text-center py-16 text-slate-400 text-sm">Loading members...</div>
+      <div id="membersList" class="space-y-2"></div>
+      <div id="membersEmpty" class="hidden text-center py-16">
+        <i data-lucide="users" class="w-10 h-10 mx-auto text-slate-300 mb-3"></i>
+        <p class="text-slate-500 font-medium">No members in this group yet.</p>
+        <button onclick="openAddMemberModal()" class="mt-3 bg-indigo-600 text-white text-sm font-medium rounded-lg px-4 py-3">+ Add Member</button>
+      </div>
+    </section>
+
+    <!-- ---------- MEMBER DETAILS PAGE ---------- -->
+    <section id="memberPage" class="hidden fade-in max-w-lg mx-auto">
+      <button onclick="goGroupFromMember()" class="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-4 p-2 -ml-2">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
+      </button>
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="flex flex-col items-center text-center mb-4">
+          <img id="mdPhoto" class="w-20 h-20 rounded-full object-cover bg-slate-100 mb-3 border" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=X'">
+          <h3 id="mdName" class="text-lg font-bold text-slate-900"></h3>
+          <span id="mdStatus" class="mt-1 text-xs font-semibold px-2.5 py-1 rounded-full"></span>
+        </div>
+        <dl class="divide-y divide-slate-100 text-sm">
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Phone</dt><dd id="mdPhone" class="font-medium"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Address</dt><dd id="mdAddress" class="font-medium text-right"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Reference</dt><dd id="mdReference" class="font-medium"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Chit Date</dt><dd id="mdChitDate" class="font-medium"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Group</dt><dd id="mdGroup" class="font-medium"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Group Amount</dt><dd id="mdGroupAmount" class="font-medium"></dd></div>
+        </dl>
+        <button id="mdPaidBtn" onclick="toggleStatusFromDetails()" class="mt-5 w-full rounded-lg py-3 text-sm font-medium"></button>
+      </div>
+    </section>
+
+    <!-- ---------- PAYMENT STATUS PAGE ---------- -->
+    <section id="statusPage" class="hidden fade-in">
+      <button onclick="goGroup(currentGroup)" class="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-4 p-2 -ml-2">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Group
+      </button>
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
+        <h3 class="font-bold text-slate-900 mb-3">Payment Summary</h3>
+        <div class="grid grid-cols-3 gap-3 text-center mb-4">
+          <div class="bg-slate-50 rounded-xl py-3"><p class="text-xl font-bold" id="statTotal">0</p><p class="text-xs text-slate-400">Total</p></div>
+          <div class="bg-emerald-50 rounded-xl py-3"><p class="text-xl font-bold text-emerald-600" id="statPaid">0</p><p class="text-xs text-slate-400">Paid</p></div>
+          <div class="bg-red-50 rounded-xl py-3"><p class="text-xl font-bold text-red-600" id="statUnpaid">0</p><p class="text-xs text-slate-400">Unpaid</p></div>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+          <div id="statBar" class="bg-emerald-500 h-2.5 rounded-full transition-all" style="width:0%"></div>
+        </div>
+        <p id="statBarText" class="text-xs text-slate-400 mt-1"></p>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <h4 class="text-sm font-semibold text-emerald-700 mb-2 flex items-center gap-1"><i data-lucide="check-circle" class="w-4 h-4"></i> Paid Members</h4>
+          <div id="paidList" class="space-y-2"></div>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-red-700 mb-2 flex items-center gap-1"><i data-lucide="x-circle" class="w-4 h-4"></i> Unpaid Members</h4>
+          <div id="unpaidList" class="space-y-2"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ======================= MODALS ======================= -->
+
+<!-- Add Group Modal -->
+<div id="addGroupModal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center px-4 py-8">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 scale-in max-h-[90vh] overflow-y-auto">
+    <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i data-lucide="folder-plus" class="w-5 h-5 text-indigo-600"></i> Add Group</h3>
+    <form id="addGroupForm" class="space-y-3">
+      <div>
+        <label class="text-xs font-medium text-slate-500">Group Name</label>
+        <input id="agName" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. S1">
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate-500">Group Amount (₹)</label>
+        <input id="agAmount" type="number" min="1" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. 100000">
+      </div>
+      <p id="agError" class="hidden text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeModal('addGroupModal')" class="flex-1 border border-slate-200 rounded-lg py-3 text-sm font-medium">Cancel</button>
+        <button type="submit" id="agSubmitBtn" class="flex-1 bg-indigo-600 text-white rounded-lg py-3 text-sm font-medium flex items-center justify-center gap-2">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Member Modal -->
+<div id="addMemberModal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center px-4 py-8">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 scale-in max-h-[90vh] overflow-y-auto">
+    <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-indigo-600"></i> Add Member</h3>
+    <form id="addMemberForm" class="space-y-3">
+      <div>
+        <label class="text-xs font-medium text-slate-500">Name</label>
+        <input id="amName" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate-500">Phone Number</label>
+        <input id="amPhone" required placeholder="10-digit or +country code" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate-500">Address</label>
+        <textarea id="amAddress" required rows="2" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate-500">Profile Photo (optional)</label>
+        <input id="amPhoto" type="file" accept="image/*" class="mt-1 w-full text-sm border border-slate-200 rounded-lg p-2">
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate-500">Reference</label>
+        <input id="amReference" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+      </div>
+      <div>
+        <label class="text-xs font-medium text-slate-500">Chit Date</label>
+        <input id="amChitDate" type="date" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+      </div>
+      <p id="amError" class="hidden text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closeModal('addMemberModal')" class="flex-1 border border-slate-200 rounded-lg py-3 text-sm font-medium">Cancel</button>
+        <button type="submit" id="amSubmitBtn" class="flex-1 bg-indigo-600 text-white rounded-lg py-3 text-sm font-medium">Add Member</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Send Card Modal -->
+<div id="sendCardModal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center px-4 py-8">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 scale-in max-h-[90vh] overflow-y-auto">
+    <h3 class="font-bold text-lg mb-1 flex items-center gap-2"><i data-lucide="send" class="w-5 h-5 text-emerald-600"></i> Send Payment Card</h3>
+    <p class="text-xs text-slate-400 mb-4" id="scTargetInfo"></p>
+    <div id="scStep1">
+      <label class="text-xs font-medium text-slate-500">Payment Amount (₹)</label>
+      <input id="scAmount" type="number" min="1" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. 5000">
+      
+      <!-- Replaced Date Picker with Integer Month -->
+      <label class="text-xs font-medium text-slate-500 mt-3 block">For Month (Number)</label>
+      <input id="scMonth" type="number" min="1" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. 5">
+      
+      <label class="text-xs font-medium text-slate-500 mt-3 block">Send to</label>
+      <select id="scTarget" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-3 text-sm bg-white">
+        <option value="all">All Members</option>
+        <option value="unpaid">Unpaid Members</option>
+        <option value="paid">Paid Members</option>
+      </select>
+      
+      <canvas id="cardCanvas" width="700" height="440" class="hidden"></canvas>
+      <div class="mt-4 border border-slate-200 rounded-xl p-3 bg-slate-50">
+        <p class="text-xs text-slate-400 mb-2">Preview</p>
+        <img id="cardPreview" class="w-full rounded-lg border shadow-sm">
+      </div>
+      <div class="flex gap-2 pt-4">
+        <button type="button" onclick="closeModal('sendCardModal')" class="flex-1 border border-slate-200 rounded-lg py-3 text-sm font-medium">Cancel</button>
+        <button type="button" onclick="previewCard()" class="flex-1 border border-indigo-200 text-indigo-600 rounded-lg py-3 text-sm font-medium">Preview</button>
+        <button type="button" onclick="confirmSendCards()" id="scSendBtn" class="flex-1 bg-emerald-600 text-white rounded-lg py-3 text-sm font-medium">Send</button>
+      </div>
+    </div>
+    <div id="scStep2" class="hidden">
+      <!-- Automatic API-send progress -->
+      <div id="scAutoProgress" class="space-y-1.5 max-h-64 overflow-y-auto text-sm mb-4"></div>
+
+      <!-- Manual per-member WhatsApp flow -->
+      <div id="scManualFlow" class="hidden">
+        <p class="text-xs text-slate-400 mb-2">
+          <span id="scManualIndex">1</span> of <span id="scManualTotal">1</span> —
+          download the Card, then open WhatsApp and attach it manually.
+        </p>
+        <div class="border border-slate-200 rounded-xl p-3 mb-3 bg-slate-50">
+          <img id="scManualPreview" class="w-full rounded-lg border shadow-sm mb-2">
+          <p class="text-sm font-semibold text-slate-900" id="scManualName"></p>
+          <p class="text-xs text-slate-400" id="scManualPhone"></p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <a id="scDownloadBtn" download class="border border-indigo-200 text-indigo-600 rounded-lg py-3 text-sm font-medium text-center flex items-center justify-center gap-1.5">
+            <i data-lucide="download" class="w-4 h-4"></i> Download
+          </a>
+          <a id="scWhatsAppBtn" target="_blank" class="bg-emerald-600 text-white rounded-lg py-3 text-sm font-medium text-center flex items-center justify-center gap-1.5">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> Open WhatsApp
+          </a>
+        </div>
+        <button type="button" onclick="scManualNext()" id="scManualNextBtn" class="w-full bg-slate-900 text-white rounded-lg py-3 text-sm font-medium">
+          Mark Sent &amp; Next
+        </button>
+      </div>
+
+      <div id="scManualDone" class="hidden text-center py-4">
+        <i data-lucide="check-circle-2" class="w-10 h-10 mx-auto text-emerald-600 mb-2"></i>
+        <p class="font-medium text-slate-900" id="scManualDoneText"></p>
+      </div>
+
+      <button type="button" onclick="closeModal('sendCardModal')" class="w-full bg-indigo-600 text-white rounded-lg py-3 text-sm font-medium mt-4">Done</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+/* =====================================================================
+   CONFIG — paste your deployed Apps Script Web App URL below
+   ===================================================================== */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynzpPAKuGwaNxnSmXzmhzNIxGihG5qg4YukC1Y3AfxXI6H6RAg1ppurOrCVhYy044u6A/exec";
+
+// Set to true only after you've configured WHATSAPP_TOKEN + WHATSAPP_PHONE_ID
+// as Script Properties in Apps Script (real WhatsApp Cloud API auto-send).
+const AUTO_SEND_VIA_API = false;
+
+/* ===================================================================== STATE */
+let currentGroup = null;
+let currentGroupAmount = 0;
+let groupsCache = [];
+let membersCache = [];
+let currentMemberRow = null;
+let selectedPhotoBase64 = '';
+
+/* ===================================================================== INIT */
+function renderIcons() {
+  try {
+    if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+  } catch (e) { /* icons are cosmetic — ignore */ }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  renderIcons();
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf('PASTE_YOUR') === 0) {
+    document.getElementById('configWarning').classList.remove('hidden');
+  }
+  if (sessionStorage.getItem('sk_logged_in') === '1') {
+    showApp();
+    loadGroups(); // Don't await on init, lets UI paint instantly
+  }
+});
+
+/* ===================================================================== API HELPER */
+const SAFE_TO_RETRY = new Set(['login', 'getGroups', 'getMembers', 'getStats']);
+
+async function api(action, payload, _retried) {
+  const canRetry = SAFE_TO_RETRY.has(action);
+  let res;
+  try {
+    res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(Object.assign({ action }, payload || {}))
+    });
+  } catch (networkErr) {
+    if (!_retried) { await sleep(700); return api(action, payload, true); }
+    throw new Error('Could not reach the server. Check internet connection.');
+  }
+
+  if (!res.ok) {
+    if (canRetry && !_retried) { await sleep(700); return api(action, payload, true); }
+    let detail = '';
+    try { detail = (await res.text()).slice(0, 200); } catch (e) {}
+    throw new Error(`Server returned ${res.status}. ${detail}`);
+  }
+
+  try {
+    return await res.json();
+  } catch (parseErr) {
+    throw new Error('Server returned an unexpected response (not JSON).');
+  }
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function toast(msg, type) {
+  type = type || 'success';
+  const colors = { success: 'bg-emerald-600', error: 'bg-red-600', info: 'bg-slate-800' };
+  const el = document.createElement('div');
+  el.className = `${colors[type]} text-white text-sm rounded-lg px-4 py-3 shadow-lg fade-in flex items-center gap-2`;
+  el.innerHTML = `<i data-lucide="${type === 'error' ? 'alert-circle' : type === 'info' ? 'info' : 'check-circle'}" class="w-4 h-4 shrink-0"></i><span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(el);
+  renderIcons();
+  setTimeout(() => el.remove(), 3800);
+}
+
+function fmtINR(n) {
+  n = Number(n) || 0;
+  return '₹' + n.toLocaleString('en-IN');
+}
+
+/* ===================================================================== LOGIN */
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const btnText = document.getElementById('loginBtnText');
+  const err = document.getElementById('loginError');
+  err.classList.add('hidden');
+  btn.disabled = true;
+  btnText.innerHTML = '<span class="spinner inline-block align-middle"></span>';
+  try {
+    const userId = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+    const r = await api('login', { userId, password });
+    if (r.success) {
+      sessionStorage.setItem('sk_logged_in', '1');
+      showApp();
+      loadGroups(); 
+    } else {
+      err.textContent = r.error || 'Invalid credentials.';
+      err.classList.remove('hidden');
+    }
+  } catch (ex) {
+    err.textContent = 'Could not reach server: ' + ex.message;
+    err.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = 'Login';
+  }
+});
+
+function showApp() {
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('appShell').classList.remove('hidden');
+}
+function logout() {
+  sessionStorage.removeItem('sk_logged_in');
+  location.reload();
+}
+
+/* ===================================================================== NAV */
+function hideAllPages() {
+  ['groupsPage', 'groupPage', 'memberPage', 'statusPage'].forEach(id => document.getElementById(id).classList.add('hidden'));
+}
+function setBreadcrumbs(items) {
+  const nav = document.getElementById('breadcrumbs');
+  nav.innerHTML = items.map((it, i) =>
+    `<span class="flex items-center gap-1 ${i === items.length - 1 ? 'text-slate-900 font-medium' : 'text-slate-400'}">
+      ${i > 0 ? '<i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>' : ''}
+      <span class="${it.fn ? 'cursor-pointer hover:text-indigo-600' : ''}" ${it.fn ? `onclick="${it.fn}"` : ''}>${it.label}</span>
+    </span>`).join('');
+  renderIcons();
+}
+
+function goGroups() {
+  hideAllPages();
+  document.getElementById('groupsPage').classList.remove('hidden');
+  setBreadcrumbs([{ label: 'Groups' }]);
+  loadGroups(); // Do not await, let it load seamlessly in background
+}
+
+async function loadGroups() {
+  const cached = sessionStorage.getItem('sk_cache_groups');
+  if (cached) {
+    try {
+      groupsCache = JSON.parse(cached);
+      renderGroups();
+      document.getElementById('groupsLoading').classList.add('hidden');
+    } catch (e) { /* ignore bad cache */ }
+  } else {
+    document.getElementById('groupsLoading').classList.remove('hidden');
+    document.getElementById('groupsGrid').innerHTML = '';
+    document.getElementById('groupsEmpty').classList.add('hidden');
+  }
+  
+  // Background Sync
+  try {
+    const r = await api('getGroups');
+    if (!r.success) throw new Error(r.error);
+    groupsCache = r.groups;
+    sessionStorage.setItem('sk_cache_groups', JSON.stringify(r.groups));
+    renderGroups();
+  } catch (ex) {
+    if (!cached) toast('Failed to load groups: ' + ex.message, 'error');
+  } finally {
+    document.getElementById('groupsLoading').classList.add('hidden');
+  }
+}
+
+function renderGroups() {
+  const q = (document.getElementById('groupSearch').value || '').toLowerCase();
+  const grid = document.getElementById('groupsGrid');
+  const filtered = groupsCache.filter(g => g.name.toLowerCase().includes(q));
+  grid.innerHTML = filtered.map(g => `
+    <div onclick="goGroup('${escAttr(g.name)}')" class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition cursor-pointer p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center"><i data-lucide="layers" class="w-5 h-5 text-indigo-600"></i></div>
+        <span class="text-xs text-slate-400">${g.memberCount} Members</span>
+      </div>
+      <h3 class="font-bold text-slate-900 text-lg">${esc(g.name)}</h3>
+      <p class="text-indigo-600 font-semibold">${g.amountFormatted}</p>
+      <div class="mt-3 text-sm text-indigo-600 font-medium flex items-center gap-1">View Group <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></div>
+    </div>`).join('');
+  document.getElementById('groupsEmpty').classList.toggle('hidden', groupsCache.length > 0);
+  renderIcons();
+}
+
+function goGroup(name) {
+  currentGroup = name;
+  const g = groupsCache.find(x => x.name === name);
+  currentGroupAmount = g ? g.amount : 0;
+  hideAllPages();
+  document.getElementById('groupPage').classList.remove('hidden');
+  document.getElementById('groupTitle').textContent = name;
+  document.getElementById('groupAmountText').textContent = fmtINR(currentGroupAmount);
+  setBreadcrumbs([{ label: 'Groups', fn: 'goGroups()' }, { label: name }]);
+  loadMembers(); // Seamless optimistic navigation 
+}
+
+/* ===================================================================== MEMBERS */
+async function loadMembers() {
+  const cacheKey = 'sk_cache_members_' + currentGroup;
+  const cached = sessionStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      membersCache = JSON.parse(cached);
+      renderMembers();
+      document.getElementById('membersLoading').classList.add('hidden');
+    } catch (e) { /* ignore bad cache */ }
+  } else {
+    document.getElementById('membersLoading').classList.remove('hidden');
+    document.getElementById('membersList').innerHTML = '';
+    document.getElementById('membersEmpty').classList.add('hidden');
+  }
+  
+  // Background Sync
+  try {
+    const r = await api('getMembers', { group: currentGroup });
+    if (!r.success) throw new Error(r.error);
+    membersCache = r.members;
+    sessionStorage.setItem(cacheKey, JSON.stringify(r.members));
+    renderMembers();
+  } catch (ex) {
+    if (!cached) toast('Failed to load members: ' + ex.message, 'error');
+  } finally {
+    document.getElementById('membersLoading').classList.add('hidden');
+  }
+}
+
+function renderMembers() {
+  const q = (document.getElementById('memberSearch').value || '').toLowerCase();
+  const filter = document.getElementById('memberFilter').value;
+  const list = document.getElementById('membersList');
+  let filtered = membersCache.filter(m =>
+    (m.name || '').toLowerCase().includes(q) || String(m.phone || '').includes(q));
+  if (filter !== 'All') filtered = filtered.filter(m => (m.status || 'Unpaid') === filter);
+
+  list.innerHTML = filtered.map(m => {
+    const paid = m.status === 'Paid';
+    return `
+    <div class="flex items-center gap-3 bg-white border rounded-xl p-3 ${paid ? 'border-emerald-100 bg-emerald-50/40' : 'border-red-100 bg-red-50/40'}">
+      <img src="${m.photoUrl || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(m.name || 'M'))}"
+           class="w-11 h-11 rounded-full object-cover bg-white border shrink-0" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(m.name||'M')}'">
+      <div class="flex-1 min-w-0 cursor-pointer py-1" onclick="goMember(${m.rowIndex})">
+        <p class="font-semibold text-slate-900 truncate">${esc(m.name)}</p>
+        <p class="text-xs text-slate-400">${esc(m.phone)}</p>
+      </div>
+      <span class="text-xs font-semibold px-2 py-1 rounded-full ${paid ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${paid ? 'PAID' : 'UNPAID'}</span>
+      <button onclick="setPaid(${m.rowIndex}, '${paid ? 'Unpaid' : 'Paid'}')"
+        class="text-xs font-medium px-4 py-2.5 rounded-lg ${paid ? 'bg-slate-100 text-slate-500' : 'bg-emerald-600 text-white'}">
+        ${paid ? 'Mark Unpaid' : 'Paid'}
+      </button>
+    </div>`;
+  }).join('');
+  document.getElementById('membersEmpty').classList.toggle('hidden', membersCache.length > 0);
+  renderIcons();
+}
+
+// Optimistic UI Update for ultra-fast clicking
+function setPaid(rowIndex, status) {
+  const m = membersCache.find(x => x.rowIndex === rowIndex);
+  if (!m) return;
+  
+  // 1. Update UI Immediately
+  m.status = status;
+  renderMembers();
+  toast(status === 'Paid' ? 'Marked as Paid' : 'Marked as Unpaid');
+
+  // 2. Sync in Background (fire and forget)
+  api('updateStatus', { group: currentGroup, rowIndex, status }).catch(ex => {
+    // Revert if it fails
+    m.status = status === 'Paid' ? 'Unpaid' : 'Paid';
+    renderMembers();
+    toast('Update failed to save: ' + ex.message, 'error');
+  });
+}
+
+/* ===================================================================== MEMBER DETAILS */
+function goMember(rowIndex) {
+  currentMemberRow = rowIndex;
+  const m = membersCache.find(x => x.rowIndex === rowIndex);
+  if (!m) return;
+  hideAllPages();
+  document.getElementById('memberPage').classList.remove('hidden');
+  document.getElementById('mdPhoto').src = m.photoUrl || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(m.name || 'M'));
+  document.getElementById('mdName').textContent = m.name;
+  document.getElementById('mdPhone').textContent = m.phone;
+  document.getElementById('mdAddress').textContent = m.address || '-';
+  document.getElementById('mdReference').textContent = m.reference || '-';
+  document.getElementById('mdChitDate').textContent = m.chitDate || '-';
+  document.getElementById('mdGroup').textContent = currentGroup;
+  document.getElementById('mdGroupAmount').textContent = fmtINR(currentGroupAmount);
+  const paid = m.status === 'Paid';
+  const statusEl = document.getElementById('mdStatus');
+  statusEl.textContent = paid ? 'PAID' : 'UNPAID';
+  statusEl.className = 'mt-1 text-xs font-semibold px-2.5 py-1 rounded-full ' + (paid ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700');
+  const btn = document.getElementById('mdPaidBtn');
+  btn.textContent = paid ? 'Mark as Unpaid' : 'Mark as Paid';
+  btn.className = 'mt-5 w-full rounded-lg py-3 text-sm font-medium ' + (paid ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-emerald-600 hover:bg-emerald-700 text-white');
+  setBreadcrumbs([{ label: 'Groups', fn: 'goGroups()' }, { label: currentGroup, fn: `goGroup('${escAttr(currentGroup)}')` }, { label: m.name }]);
+}
+function goGroupFromMember() { goGroup(currentGroup); }
+function toggleStatusFromDetails() {
+  const m = membersCache.find(x => x.rowIndex === currentMemberRow);
+  if (!m) return;
+  setPaid(m.rowIndex, m.status === 'Paid' ? 'Unpaid' : 'Paid');
+  goMember(currentMemberRow); // instant visual update
+}
+
+/* ===================================================================== PAYMENT STATUS PAGE */
+async function openStatusView() {
+  hideAllPages();
+  document.getElementById('statusPage').classList.remove('hidden');
+  setBreadcrumbs([{ label: 'Groups', fn: 'goGroups()' }, { label: currentGroup, fn: `goGroup('${escAttr(currentGroup)}')` }, { label: 'Payment Status' }]);
+  
+  // Render offline/cached state instantly
+  renderStatusLists();
+
+  try {
+    const r = await api('getStats', { group: currentGroup });
+    if (r.success) {
+      document.getElementById('statTotal').textContent = r.total;
+      document.getElementById('statPaid').textContent = r.paid;
+      document.getElementById('statUnpaid').textContent = r.unpaid;
+      const pct = r.total ? Math.round((r.paid / r.total) * 100) : 0;
+      document.getElementById('statBar').style.width = pct + '%';
+      document.getElementById('statBarText').textContent = `${r.paid} / ${r.total} Paid`;
+    }
+  } catch (ex) { toast('Failed to load live stats: ' + ex.message, 'error'); }
+}
+
+function renderStatusLists() {
+  const paid = membersCache.filter(m => m.status === 'Paid');
+  const unpaid = membersCache.filter(m => m.status !== 'Paid');
+  const row = m => `<div onclick="goMember(${m.rowIndex})" class="cursor-pointer bg-white border rounded-lg p-2.5 flex items-center gap-3 hover:shadow-sm">
+      <img src="${m.photoUrl || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(m.name||'M'))}" class="w-9 h-9 rounded-full object-cover border">
+      <div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">${esc(m.name)}</p><p class="text-xs text-slate-400">${esc(m.phone)}</p></div>
+    </div>`;
+  document.getElementById('paidList').innerHTML = paid.map(row).join('') || '<p class="text-xs text-slate-400">None</p>';
+  document.getElementById('unpaidList').innerHTML = unpaid.map(row).join('') || '<p class="text-xs text-slate-400">None</p>';
+}
+
+/* ===================================================================== ADD GROUP */
+function openAddGroupModal() {
+  document.getElementById('addGroupForm').reset();
+  document.getElementById('agError').classList.add('hidden');
+  openModal('addGroupModal');
+}
+document.getElementById('addGroupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('agError');
+  err.classList.add('hidden');
+  const name = document.getElementById('agName').value.trim();
+  const amount = document.getElementById('agAmount').value;
+  const btn = document.getElementById('agSubmitBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner inline-block"></span>';
+  try {
+    const r = await api('addGroup', { name, amount });
+    if (!r.success) { err.textContent = r.error; err.classList.remove('hidden'); return; }
+    closeModal('addGroupModal');
+    toast('Group "' + name + '" created');
+    await loadGroups();
+  } catch (ex) {
+    err.textContent = 'Failed: ' + ex.message; err.classList.remove('hidden');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create';
+  }
+});
+
+/* ===================================================================== ADD MEMBER */
+function openAddMemberModal() {
+  document.getElementById('addMemberForm').reset();
+  document.getElementById('amError').classList.add('hidden');
+  selectedPhotoBase64 = '';
+  openModal('addMemberModal');
+}
+document.getElementById('addMemberForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = document.getElementById('amError');
+  err.classList.add('hidden');
+  const btn = document.getElementById('amSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    let photoUrl = '';
+    const fileInput = document.getElementById('amPhoto');
+    if (fileInput.files && fileInput.files[0]) {
+      const base64 = await fileToBase64(fileInput.files[0]);
+      const up = await api('uploadPhoto', { imageBase64: base64 });
+      if (up.success) photoUrl = up.url;
+    }
+    const payload = {
+      group: currentGroup,
+      name: document.getElementById('amName').value.trim(),
+      phone: document.getElementById('amPhone').value.trim(),
+      address: document.getElementById('amAddress').value.trim(),
+      photoUrl,
+      reference: document.getElementById('amReference').value.trim(),
+      chitDate: document.getElementById('amChitDate').value
+    };
+    const r = await api('addMember', payload);
+    if (!r.success) { err.textContent = r.error; err.classList.remove('hidden'); return; }
+    closeModal('addMemberModal');
+    toast('Member added');
+    await loadMembers();
+  } catch (ex) {
+    err.textContent = 'Failed: ' + ex.message; err.classList.remove('hidden');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Add Member';
+  }
+});
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ===================================================================== SEND CARD / Card */
+function openSendCardModal() {
+  document.getElementById('scStep1').classList.remove('hidden');
+  document.getElementById('scStep2').classList.add('hidden');
+  document.getElementById('scAmount').value = '';
+  document.getElementById('scMonth').value = ''; 
+  document.getElementById('cardPreview').src = '';
+  document.getElementById('scTargetInfo').textContent = `Group: ${currentGroup} · ${fmtINR(currentGroupAmount)}`;
+  openModal('sendCardModal');
+}
+
+function loadImageForCanvas(url) {
+  return new Promise((resolve) => {
+    if (!url) return resolve(null);
+    const img = new Image();
+    let done = false;
+    const finish = (val) => { if (!done) { done = true; resolve(val); } };
+    img.crossOrigin = 'anonymous';
+    img.onload = () => finish(img);
+    img.onerror = () => finish(null);
+    setTimeout(() => finish(null), 4000);
+    img.src = url;
+  });
+}
+
+function getInitials(name) {
+  const parts = String(name || '?').trim().split(/\s+/);
+  return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || '?';
+}
+
+function roundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function formatDateNice(d) {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+// Digital Premium Card Design (No longer looks like an ATM Card)
+async function drawCard(member) {
+  const m = typeof member === 'string' ? { name: member, photoUrl: '' } : (member || { name: 'Member Name', photoUrl: '' });
+  const canvas = document.getElementById('cardCanvas');
+  const W = canvas.width, H = canvas.height;
+  const ctx = canvas.getContext('2d');
+  const amount = Number(document.getElementById('scAmount').value) || 0;
+  const monthNum = document.getElementById('scMonth').value || '-';
+  const dateStr = formatDateNice(new Date());
+  const photoImg = await loadImageForCanvas(m.photoUrl);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Outer Canvas Soft Shadow
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.3)';
+  ctx.shadowBlur = 24;
+  ctx.shadowOffsetY = 12;
+  ctx.fillStyle = '#0f172a';
+  roundRectPath(ctx, 14, 14, W - 28, H - 28, 16);
+  ctx.fill();
+  ctx.restore();
+
+  // Clip Card Area
+  ctx.save();
+  roundRectPath(ctx, 14, 14, W - 28, H - 28, 16);
+  ctx.clip();
+
+  // Dark Elegant Gradient BG
+  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+  bgGrad.addColorStop(0, '#1e293b'); // slate-800
+  bgGrad.addColorStop(1, '#020617'); // slate-950
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Abstract shapes for premium feel (kept from before, looks nice)
+  ctx.globalAlpha = 0.05;
+  ctx.beginPath();
+  ctx.arc(W, 0, 300, 0, Math.PI * 2);
+  ctx.fillStyle = '#818cf8';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(0, H, 200, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1.0;
+
+  // Header - Left Aligned (Card Style)
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 36px Segoe UI, Arial';
+  ctx.fillText('SAMI CHITS', 50, 75);
+  ctx.font = '600 14px Segoe UI, Arial';
+  ctx.fillStyle = '#818cf8'; // Indigo accent
+  ctx.fillText('OFFICIAL PAYMENT Card', 50, 100);
+
+  // Member Photo / Initials avatar - Top Right
+  const cx = W - 90, cy = 80, r = 40;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#334155';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+  if (photoImg) {
+    const iw = photoImg.width, ih = photoImg.height;
+    const scale = Math.max((r * 2) / iw, (r * 2) / ih);
+    const dw = iw * scale, dh = ih * scale;
+    ctx.drawImage(photoImg, cx - dw / 2, cy - dh / 2, dw, dh);
+  } else {
+    ctx.fillStyle = '#475569';
+    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 28px Segoe UI, Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(getInitials(m.name), cx, cy + 2);
+    ctx.textBaseline = 'alphabetic';
+  }
+  ctx.restore();
+
+  // Payment Amount Highlight (Center Left)
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '12px Segoe UI, Arial';
+  ctx.fillText('AMOUNT RECEIVED', 50, 160);
+  ctx.fillStyle = '#d4af37'; // Gold
+  ctx.font = 'bold 42px Segoe UI, Arial';
+  ctx.fillText(fmtINR(amount), 50, 205);
+
+  // Subtle Divider Line
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(50, 240);
+  ctx.lineTo(W - 50, 240);
+  ctx.stroke();
+
+  // Grid Layout for Data (Lower Section)
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '12px Segoe UI, Arial';
+  ctx.fillText('MEMBER NAME', 50, 280);
+  ctx.fillText('GROUP / TARGET', 350, 280);
+  
+  ctx.fillText('MONTH', 50, 350);
+  ctx.fillText('DATE', 350, 350);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 20px Segoe UI, Arial';
+  
+  // Member Name
+  ctx.fillText((m.name || 'MEMBER').toUpperCase(), 50, 305);
+  // Group
+  ctx.fillText(`${currentGroup}  ·  ${fmtINR(currentGroupAmount)}`, 350, 305);
+  // Month
+  ctx.fillText(monthNum, 50, 375);
+  // Date
+  ctx.fillText(dateStr, 350, 375);
+
+  // Bottom Footer
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#475569';
+  ctx.font = '11px Segoe UI, Arial';
+  ctx.fillText('DIGITALLY GENERATED RECEIPT · SAMI CHITS', W / 2, H - 25);
+
+  ctx.restore(); // release clip
+
+  try {
+    return canvas.toDataURL('image/png');
+  } catch (e) {
+    return await drawCard({ ...m, photoUrl: '' }); // Fail-safe
+  }
+}
+
+async function previewCard() {
+  if (!document.getElementById('scAmount').value) { toast('Enter a payment amount first', 'error'); return; }
+  const sample = getTargetMembers()[0];
+  const dataUrl = await drawCard(sample || { name: 'Member Name', photoUrl: '' });
+  document.getElementById('cardPreview').src = dataUrl;
+}
+
+function getTargetMembers() {
+  const t = document.getElementById('scTarget').value;
+  if (t === 'paid') return membersCache.filter(m => m.status === 'Paid');
+  if (t === 'unpaid') return membersCache.filter(m => m.status !== 'Paid');
+  return membersCache;
+}
+
+async function confirmSendCards() {
+  const amount = document.getElementById('scAmount').value;
+  if (!amount || Number(amount) <= 0) { toast('Enter a valid payment amount', 'error'); return; }
+  const targets = getTargetMembers();
+  if (!targets.length) { toast('No members match this target', 'error'); return; }
+
+  document.getElementById('scStep1').classList.add('hidden');
+  document.getElementById('scStep2').classList.remove('hidden');
+
+  if (AUTO_SEND_VIA_API) {
+    await runAutoSend(targets);
+  } else {
+    runManualSend(targets);
+  }
+}
+
+/* ---- Automatic send via WhatsApp Cloud API ---- */
+async function runAutoSend(targets) {
+  document.getElementById('scAutoProgress').classList.remove('hidden');
+  document.getElementById('scManualFlow').classList.add('hidden');
+  document.getElementById('scManualDone').classList.add('hidden');
+  const progress = document.getElementById('scAutoProgress');
+  progress.innerHTML = '';
+
+  for (const m of targets) {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2';
+    row.innerHTML = `<span class="spinner border-indigo-200" style="border-top-color:#4f46e5"></span> <span>${esc(m.name)}...</span>`;
+    progress.appendChild(row);
+    progress.scrollTop = progress.scrollHeight;
+
+    try {
+      const imageBase64 = await drawCard(m);
+      const r = await api('sendCard', {
+        group: currentGroup, phone: m.phone, name: m.name, imageBase64,
+        caption: `Payment Card for ${m.name} · ${currentGroup}`
+      });
+      if (r.success) {
+        row.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i> <span>${esc(m.name)}${r.demo ? ' — generated (demo mode)' : ' — sent'}</span>`;
+      } else {
+        row.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i> <span>${esc(m.name)} — ${esc(r.error || 'failed')}</span>`;
+      }
+    } catch (ex) {
+      row.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i> <span>${esc(m.name)} — ${esc(ex.message)}</span>`;
+    }
+    renderIcons();
+  }
+}
+
+/* ---- Manual flow ---- */
+let scManualQueue = [];
+let scManualIdx = 0;
+
+async function runManualSend(targets) {
+  document.getElementById('scAutoProgress').classList.add('hidden');
+  document.getElementById('scManualDone').classList.add('hidden');
+  document.getElementById('scManualFlow').classList.remove('hidden');
+  scManualQueue = targets;
+  scManualIdx = 0;
+  document.getElementById('scManualTotal').textContent = targets.length;
+  await showManualMember();
+}
+
+function normalizePhoneClient(phone) {
+  let p = String(phone || '').replace(/[^\d+]/g, '');
+  if (!p) return null;
+  if (p.startsWith('+')) p = p.substring(1);
+  if (p.length === 10) p = '91' + p;
+  if (p.length < 10) return null;
+  return p;
+}
+
+async function showManualMember() {
+  const m = scManualQueue[scManualIdx];
+  document.getElementById('scManualIndex').textContent = scManualIdx + 1;
+
+  const dataUrl = await drawCard(m);
+  document.getElementById('scManualPreview').src = dataUrl;
+  document.getElementById('scManualName').textContent = m.name;
+  document.getElementById('scManualPhone').textContent = m.phone;
+
+  const dlBtn = document.getElementById('scDownloadBtn');
+  dlBtn.href = dataUrl;
+  dlBtn.download = `Sami-Chits-Card-${(m.name || 'member').replace(/[^a-z0-9]/gi, '_')}.png`;
+
+  const phone = normalizePhoneClient(m.phone);
+  const amount = document.getElementById('scAmount').value;
+  const caption = `Hi ${m.name}, here is your Sami Chits payment Card for group ${currentGroup} (Payment: ${fmtINR(amount)}). Please find the attached receipt image.`;
+  const waBtn = document.getElementById('scWhatsAppBtn');
+  if (phone) {
+    waBtn.href = `https://wa.me/${phone}?text=${encodeURIComponent(caption)}`;
+    waBtn.classList.remove('opacity-50', 'pointer-events-none');
+  } else {
+    waBtn.href = '#';
+    waBtn.classList.add('opacity-50', 'pointer-events-none');
+    toast(`${m.name} has an invalid WhatsApp number — skip this one`, 'error');
+  }
+
+  document.getElementById('scManualNextBtn').textContent =
+    scManualIdx === scManualQueue.length - 1 ? 'Finish' : 'Mark Sent & Next';
+  renderIcons();
+}
+
+async function scManualNext() {
+  scManualIdx++;
+  if (scManualIdx >= scManualQueue.length) {
+    document.getElementById('scManualFlow').classList.add('hidden');
+    document.getElementById('scManualDone').classList.remove('hidden');
+    document.getElementById('scManualDoneText').textContent =
+      `Done — ${scManualQueue.length} Card${scManualQueue.length === 1 ? '' : 's'} generated for ${currentGroup}.`;
+    return;
+  }
+  await showManualMember();
+}
+
+/* ===================================================================== MODAL HELPERS */
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); renderIcons(); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function escAttr(s) { return String(s).replace(/'/g, "\\'"); }
+</script>
+</body>
+</html>
