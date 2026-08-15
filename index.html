@@ -286,49 +286,46 @@
       
       <canvas id="cardCanvas" class="hidden"></canvas>
       <div class="mt-4 border border-slate-200 rounded-xl p-3 bg-slate-50">
-        <p class="text-xs text-slate-400 mb-2">Preview</p>
+        <p class="text-xs text-slate-400 mb-2 text-center">Preview (Long-press to save to Gallery)</p>
         <img id="cardPreview" class="w-full rounded-lg border shadow-sm">
       </div>
-      <div class="grid grid-cols-3 gap-2 pt-4">
+      <div class="grid grid-cols-2 gap-2 pt-4">
         <button type="button" onclick="closeModal('sendCardModal')" class="border border-slate-200 rounded-lg py-2.5 text-sm font-medium bg-white">Cancel</button>
-        <button type="button" onclick="previewCard()" class="border border-indigo-200 text-indigo-600 rounded-lg py-2.5 text-sm font-medium bg-white hover:bg-indigo-50">Preview</button>
-        <button type="button" onclick="confirmSendCards()" id="scSendBtn" class="bg-emerald-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-emerald-700">Send</button>
+        <button type="button" onclick="confirmSendCards()" id="scSendBtn" class="bg-emerald-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-emerald-700">Next Step</button>
       </div>
     </div>
     <div id="scStep2" class="hidden">
-      <!-- Automatic API-send progress -->
-      <div id="scAutoProgress" class="space-y-1.5 max-h-64 overflow-y-auto text-sm mb-4"></div>
-
       <!-- Manual per-member WhatsApp flow -->
-      <div id="scManualFlow" class="hidden">
-        <div class="bg-indigo-50 text-indigo-800 p-3 rounded-lg text-xs mb-3">
-          <p class="font-semibold mb-1">Important:</p>
-          WhatsApp blocks sending images automatically via links. When you click <b>WhatsApp</b>, we will auto-download the card and open the chat. Please <b>Attach</b> the card from your gallery!
+      <div id="scManualFlow">
+        <div class="bg-amber-50 text-amber-800 border border-amber-200 p-3 rounded-lg text-xs mb-4">
+          <p class="font-bold mb-1">WhatsApp Browser Limitation:</p>
+          Websites cannot automatically send images directly into a specific chat. Choose an option below:
         </div>
-        <div class="border border-slate-200 rounded-xl p-3 mb-3 bg-slate-50">
-          <img id="scManualPreview" class="w-full rounded-lg border shadow-sm mb-2">
-          <p class="text-sm font-semibold text-slate-900" id="scManualName"></p>
-          <p class="text-xs text-slate-400" id="scManualPhone"></p>
+        
+        <div class="flex items-center gap-3 mb-4">
+           <img id="scManualPreview" class="w-16 h-16 object-cover rounded-lg border shadow-sm">
+           <div>
+              <p class="text-sm font-bold text-slate-900" id="scManualName"></p>
+              <p class="text-xs text-slate-500" id="scManualPhone"></p>
+           </div>
         </div>
-        <div class="grid grid-cols-3 gap-2 mb-3">
-          <button type="button" onclick="copyCardImage()" class="bg-indigo-600 text-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-indigo-700 transition">
-            <i data-lucide="copy" class="w-4 h-4"></i> Copy Card
+
+        <div class="space-y-2 mb-4">
+          <button type="button" id="scShareBtn" class="w-full bg-indigo-600 text-white rounded-lg py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-indigo-700 transition shadow-sm">
+            <i data-lucide="share-2" class="w-4 h-4"></i> Option 1: Share Image
           </button>
-          <a id="scDownloadBtn" download class="border border-slate-200 text-slate-700 bg-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-slate-50 transition">
-            <i data-lucide="download" class="w-4 h-4"></i> Download
-          </a>
-          <button type="button" id="scWhatsAppBtn" class="bg-emerald-600 text-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-emerald-700 transition">
-            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
+          <p class="text-[11px] text-center text-slate-400">Sends Image & Text perfectly, but you must select the contact.</p>
+        </div>
+
+        <div class="space-y-2 border-t border-slate-100 pt-4 mb-4">
+          <button type="button" id="scDirectBtn" class="w-full bg-emerald-600 text-white rounded-lg py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-emerald-700 transition shadow-sm">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> Option 2: Direct Chat
           </button>
+          <p class="text-[11px] text-center text-slate-400">Opens their chat directly. You must attach the image manually (Long-press the preview image above to save it).</p>
         </div>
       </div>
 
-      <div id="scManualDone" class="hidden text-center py-4">
-        <i data-lucide="check-circle-2" class="w-10 h-10 mx-auto text-emerald-600 mb-2"></i>
-        <p class="font-medium text-slate-900" id="scManualDoneText"></p>
-      </div>
-
-      <button type="button" onclick="closeModal('sendCardModal')" class="w-full border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 rounded-lg py-2.5 text-sm font-medium mt-2">Close</button>
+      <button type="button" onclick="closeModal('sendCardModal')" class="w-full border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 rounded-lg py-3 text-sm font-bold mt-2">Close</button>
     </div>
   </div>
 </div>
@@ -340,9 +337,6 @@
    ===================================================================== */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynzpPAKuGwaNxnSmXzmhzNIxGihG5qg4YukC1Y3AfxXI6H6RAg1ppurOrCVhYy044u6A/exec";
 
-// Set to true only after you've configured WHATSAPP_TOKEN + WHATSAPP_PHONE_ID
-// as Script Properties in Apps Script (real WhatsApp Cloud API auto-send).
-const AUTO_SEND_VIA_API = false;
 const CACHE_TTL_MS = 60 * 1000;
 
 /* ===================================================================== STATE */
@@ -352,7 +346,7 @@ let groupsCache = [];
 let membersCache = [];
 let currentMemberRow = null;
 
-// Track which cards have been sent in this session (Requirement 2)
+// Track which cards have been sent in this session
 let sentCardsSession = new Set(); 
 
 /* ===================================================================== INIT */
@@ -379,13 +373,12 @@ window.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('popstate', (e) => {
   const s = e.state;
 
-  // 1. Force hide all modals first
+  // Force hide all modals first
   ['addGroupModal', 'addMemberModal', 'sendCardModal'].forEach(id => {
      const el = document.getElementById(id);
      if(el) el.classList.add('hidden');
   });
 
-  // 2. If no state, we are at the beginning. Route to groups.
   if (!s) {
      if (sessionStorage.getItem('sk_logged_in') === '1') {
         history.replaceState({ page: 'groupsPage' }, "", "#groups");
@@ -394,7 +387,6 @@ window.addEventListener('popstate', (e) => {
      return;
   }
 
-  // 3. Render appropriately based on state stack
   if (s.modal) {
      document.getElementById(s.modal).classList.remove('hidden');
   } else if (s.page === 'groupsPage') {
@@ -442,8 +434,6 @@ async function api(action, payload, _retried) {
 
   if (!res.ok) {
     if (canRetry && !_retried) { await sleep(700); return api(action, payload, true); }
-    let detail = '';
-    try { detail = (await res.text()).slice(0, 200); } catch (e) {}
     throw new Error(`Server returned ${res.status}.`);
   }
 
@@ -632,7 +622,6 @@ function renderMembers() {
 
   list.innerHTML = filtered.map(m => {
     const paid = m.status === 'Paid';
-    // Requirement 2: Alter color if the card was sent this session
     const isSent = sentCardsSession.has(m.rowIndex);
     
     // Dynamic styling for Sent vs Unsent button
@@ -669,9 +658,9 @@ function renderMembers() {
 }
 
 async function setPaid(rowIndex, status, event, btnElement) {
-  if (event) event.stopPropagation(); // Stops the row click event from firing
+  if (event) event.stopPropagation();
 
-  document.body.style.cursor = 'wait'; // Show system loading cursor
+  document.body.style.cursor = 'wait';
   const originalText = btnElement ? btnElement.innerHTML : '';
   
   if (btnElement) {
@@ -895,6 +884,9 @@ function openSingleCardModal(rowIndex, event) {
   targetSelect.innerHTML = `<option value="single_${rowIndex}">${m.name}</option>`;
   targetSelect.value = `single_${rowIndex}`;
 
+  // Automatically preview for the user
+  setTimeout(previewCard, 100);
+
   openModal('sendCardModal');
 }
 
@@ -957,14 +949,12 @@ async function drawCard(member) {
 
   ctx.clearRect(0, 0, W, H);
 
-  // 1. Outer Box & Background White Base
   ctx.save();
   ctx.fillStyle = '#ffffff';
   roundRectPath(ctx, 0, 0, W, H, 16);
   ctx.fill();
   ctx.clip();
 
-  // 2. Faint Watermarks & Corner Circles for depth
   ctx.beginPath();
   ctx.arc(0, H + 20, 180, 0, Math.PI * 2);
   ctx.fillStyle = '#f8fafc';
@@ -985,14 +975,12 @@ async function drawCard(member) {
   ctx.fillText('SAMI CHITS', 0, 0);
   ctx.restore();
 
-  // 3. Top Header Banner (Gradient Blue/Purple)
   const grad = ctx.createLinearGradient(0, 0, W, 110);
-  grad.addColorStop(0, '#2e3192'); // Deep blue
-  grad.addColorStop(1, '#5b54fa'); // Lighter purple
+  grad.addColorStop(0, '#2e3192'); 
+  grad.addColorStop(1, '#5b54fa'); 
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, 110);
   
-  // Decorative faint rings in header
   ctx.save();
   ctx.strokeStyle = '#ffffff';
   ctx.globalAlpha = 0.1;
@@ -1001,11 +989,9 @@ async function drawCard(member) {
   ctx.beginPath(); ctx.arc(80, 30, 110, 0, Math.PI*2); ctx.stroke();
   ctx.restore();
 
-  // 4. Gold Divider Line
   ctx.fillStyle = '#fbbd08';
   ctx.fillRect(0, 110, W, 4);
 
-  // 5. Header Texts (SAMI CHITS)
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'left';
   ctx.font = '900 36px "Segoe UI", sans-serif';
@@ -1014,7 +1000,6 @@ async function drawCard(member) {
   ctx.font = '600 14px "Segoe UI", sans-serif';
   ctx.fillText('P A Y M E N T   C A R D', 40, 84);
 
-  // 6. Right Aligned Circular Avatar
   const avCx = W - 90, avCy = 110, avR = 46;
   
   ctx.beginPath();
@@ -1044,7 +1029,6 @@ async function drawCard(member) {
   }
   ctx.restore();
 
-  // 7. Clean 2-Column Grid Layout (Using full width)
   ctx.fillStyle = '#818cf8'; 
   ctx.font = '600 12px "Segoe UI", sans-serif';
   
@@ -1071,7 +1055,6 @@ async function drawCard(member) {
   ctx.fillText(fmtINR(currentGroupAmount), 350, 285);
   ctx.fillText(dateStr, 350, 385);
 
-  // 8. Footer Checkmark & Text
   ctx.fillStyle = '#94a3b8';
   ctx.font = '10px "Segoe UI", sans-serif';
   ctx.textAlign = 'center';
@@ -1120,44 +1103,7 @@ async function confirmSendCards() {
   document.getElementById('scStep1').classList.add('hidden');
   document.getElementById('scStep2').classList.remove('hidden');
 
-  if (AUTO_SEND_VIA_API) {
-    await runAutoSend(targets);
-  } else {
-    runManualSend(targets);
-  }
-}
-
-/* ---- Automatic send via WhatsApp Cloud API ---- */
-async function runAutoSend(targets) {
-  document.getElementById('scAutoProgress').classList.remove('hidden');
-  document.getElementById('scManualFlow').classList.add('hidden');
-  document.getElementById('scManualDone').classList.add('hidden');
-  const progress = document.getElementById('scAutoProgress');
-  progress.innerHTML = '';
-
-  for (const m of targets) {
-    const row = document.createElement('div');
-    row.className = 'flex items-center gap-2';
-    row.innerHTML = `<span class="spinner border-indigo-200" style="border-top-color:#4f46e5"></span> <span>${esc(m.name)}...</span>`;
-    progress.appendChild(row);
-    progress.scrollTop = progress.scrollHeight;
-
-    try {
-      const imageBase64 = await drawCard(m);
-      const r = await api('sendCard', {
-        group: currentGroup, phone: m.phone, name: m.name, imageBase64,
-        caption: `Payment card for ${m.name} · ${currentGroup}`
-      });
-      if (r.success) {
-        row.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i> <span>${esc(m.name)}${r.demo ? ' — generated (demo mode)' : ' — sent'}</span>`;
-      } else {
-        row.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i> <span>${esc(m.name)} — ${esc(r.error || 'failed')}</span>`;
-      }
-    } catch (ex) {
-      row.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i> <span>${esc(m.name)} — ${esc(ex.message)}</span>`;
-    }
-    renderIcons();
-  }
+  await runManualSend(targets);
 }
 
 /* ---- Manual flow ---- */
@@ -1165,9 +1111,6 @@ let scManualQueue = [];
 let scManualIdx = 0;
 
 async function runManualSend(targets) {
-  document.getElementById('scAutoProgress').classList.add('hidden');
-  document.getElementById('scManualDone').classList.add('hidden');
-  document.getElementById('scManualFlow').classList.remove('hidden');
   scManualQueue = targets;
   scManualIdx = 0;
   await showManualMember();
@@ -1182,33 +1125,47 @@ function normalizePhoneClient(phone) {
   return p;
 }
 
-// Fixed Requirement 1 & 2: Sending directly via Native Share API / auto-download
-async function sendToWhatsApp(phone, caption, name, rowIndex) {
-  const dataUrl = document.getElementById('cardPreview').src;
+/* ===================================================================== NATIVE SHARE & DIRECT CHAT */
 
-  // Requirement 2: Track button color change instantly
+// Requirement 1 & 2: Share Native API
+async function shareCardNative(caption, name, rowIndex) {
+  const dataUrl = document.getElementById('cardPreview').src;
   sentCardsSession.add(rowIndex);
-  renderMembers();
+  renderMembers(); // Changes button to Green (Requirement 2)
+
+  try {
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], `Sami-Chits-Card-${name.replace(/\s+/g,'_')}.png`, { type: blob.type });
+
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'Payment Card',
+        text: caption
+      });
+      toast('Card shared successfully!', 'success');
+    } else {
+      toast('Native sharing not supported. Use Direct Chat instead.', 'error');
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') console.error('Share error:', err);
+  }
+}
+
+// Requirement 1 & 2: Open Direct Chat via wa.me
+async function openDirectChat(phone, caption, rowIndex) {
+  sentCardsSession.add(rowIndex);
+  renderMembers(); // Changes button to Green (Requirement 2)
 
   if (!phone) {
-    toast('Invalid WhatsApp number. Please download the card manually.', 'error');
+    toast('Invalid WhatsApp number.', 'error');
     return;
   }
-
-  // Auto-download the image first so it's readily available to attach
-  const dlLink = document.createElement('a');
-  dlLink.href = dataUrl;
-  dlLink.download = `Sami-Chits-Card-${(name || 'member').replace(/[^a-z0-9]/gi, '_')}.png`;
-  document.body.appendChild(dlLink);
-  dlLink.click();
-  document.body.removeChild(dlLink);
-
-  toast('Card downloaded! Opening chat...', 'info');
-
-  // Open direct WhatsApp DM (Mobile or Web)
+  
+  toast('Opening Chat. Attach the image manually!', 'info');
   setTimeout(() => {
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(caption)}`, '_blank');
-  }, 800);
+  }, 400);
 }
 
 async function showManualMember() {
@@ -1219,39 +1176,19 @@ async function showManualMember() {
   document.getElementById('scManualName').textContent = m.name;
   document.getElementById('scManualPhone').textContent = m.phone;
 
-  const dlBtn = document.getElementById('scDownloadBtn');
-  dlBtn.href = dataUrl;
-  dlBtn.download = `Sami-Chits-Card-${(m.name || 'member').replace(/[^a-z0-9]/gi, '_')}.png`;
-
   const phone = normalizePhoneClient(m.phone);
   const amount = document.getElementById('scAmount').value;
   const monthInfo = getSelectedMonthInfo();
   const monthPart = monthInfo.valid ? ` for ${monthInfo.label}` : '';
   const caption = `Hi ${m.name}, here is your Sami Chits payment card${monthPart} for group ${currentGroup} (Payment: ${fmtINR(amount)}).`;
   
-  // Attach Direct WhatsApp logic
-  const waBtn = document.getElementById('scWhatsAppBtn');
-  waBtn.onclick = () => sendToWhatsApp(phone, caption, m.name, m.rowIndex);
+  // Bind Option 1: Share Image
+  document.getElementById('scShareBtn').onclick = () => shareCardNative(caption, m.name, m.rowIndex);
+  
+  // Bind Option 2: Direct Chat
+  document.getElementById('scDirectBtn').onclick = () => openDirectChat(phone, caption, m.rowIndex);
 
   renderIcons();
-}
-
-async function copyCardImage() {
-  try {
-    const canvas = document.getElementById('cardCanvas');
-    canvas.toBlob(async (blob) => {
-      try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'image/png': blob })
-        ]);
-        toast('Card copied! Click WhatsApp and Paste to send.', 'success');
-      } catch (err) {
-        toast('Clipboard access denied. Please click Download instead.', 'error');
-      }
-    }, 'image/png');
-  } catch (err) {
-    toast('Failed to copy image.', 'error');
-  }
 }
 
 /* ===================================================================== UTILS */
