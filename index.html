@@ -302,8 +302,8 @@
       <!-- Manual per-member WhatsApp flow -->
       <div id="scManualFlow" class="hidden">
         <div class="bg-indigo-50 text-indigo-800 p-3 rounded-lg text-xs mb-3">
-          <p class="font-semibold mb-1">WhatsApp Web Limitation:</p>
-          Images cannot be auto-attached to links. Please click <b>Copy Card</b>, then open WhatsApp and <b>Paste</b> the image to send!
+          <p class="font-semibold mb-1">How to Send:</p>
+          On mobile, click <b>Share to App</b> to send both the image and text. On PC, it will copy the image so you can Paste it in WhatsApp!
         </div>
         <div class="border border-slate-200 rounded-xl p-3 mb-3 bg-slate-50">
           <img id="scManualPreview" class="w-full rounded-lg border shadow-sm mb-2">
@@ -317,9 +317,10 @@
           <a id="scDownloadBtn" download class="border border-slate-200 text-slate-700 bg-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-slate-50 transition">
             <i data-lucide="download" class="w-4 h-4"></i> Download
           </a>
-          <a id="scWhatsAppBtn" target="_blank" class="bg-emerald-600 text-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-emerald-700 transition">
-            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
-          </a>
+          <!-- Fixed Requirement 1: Call Web Share API for Mobile Image + Text -->
+          <button type="button" id="scWhatsAppBtn" class="bg-emerald-600 text-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-emerald-700 transition">
+            <i data-lucide="share-2" class="w-4 h-4"></i> Share to App
+          </button>
         </div>
       </div>
 
@@ -352,6 +353,9 @@ let groupsCache = [];
 let membersCache = [];
 let currentMemberRow = null;
 
+// Track which cards have been sent in this session (Requirement 2)
+let sentCardsSession = new Set(); 
+
 /* ===================================================================== INIT */
 function renderIcons() {
   try {
@@ -373,8 +377,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ===================================================================== ROUTING / BACK BUTTON
-   Requirement 3: Fix Android Back button closing the app
-   We intercept popstate and gracefully move backward through views and modals. */
+   Requirement 3: Fix Android Back button closing the app */
 window.addEventListener('popstate', (e) => {
   const s = e.state;
 
@@ -631,6 +634,16 @@ function renderMembers() {
 
   list.innerHTML = filtered.map(m => {
     const paid = m.status === 'Paid';
+    // Requirement 2: Alter color if the card was sent this session
+    const isSent = sentCardsSession.has(m.rowIndex);
+    
+    // Dynamic styling for Sent vs Unsent button
+    const sendBtnClass = isSent 
+      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
+      : 'bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100';
+    const sendBtnIcon = isSent ? 'check-check' : 'send';
+    const sendBtnText = isSent ? 'Sent' : 'Send Card';
+
     return `
     <div class="flex items-center flex-wrap gap-3 bg-white border rounded-xl p-3 ${paid ? 'border-emerald-100 bg-emerald-50/40' : 'border-red-100 bg-red-50/40'}">
       <img src="${m.photoUrl || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(m.name || 'M'))}"
@@ -643,14 +656,12 @@ function renderMembers() {
       <span class="text-xs font-semibold px-2 py-1 rounded-full ${paid ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${paid ? 'PAID' : 'UNPAID'}</span>
       
       <div class="flex flex-col gap-1.5 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
-        <!-- Fixed Requirement 3 & 4: Corrected onclick stopping propagation and showing loading spinner -->
         <button onclick="setPaid(${m.rowIndex}, '${paid ? 'Unpaid' : 'Paid'}', event, this)"
           class="text-xs font-medium px-4 py-2 rounded-lg ${paid ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-emerald-600 text-white hover:bg-emerald-700'} w-full sm:w-28 text-center transition flex items-center justify-center min-h-[36px]">
           ${paid ? 'Mark Unpaid' : 'Paid'}
         </button>
-        <!-- Requirement 2: Individual Send Card Button -->
-        <button onclick="openSingleCardModal(${m.rowIndex})" class="text-xs font-medium px-4 py-2 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100 w-full sm:w-28 flex items-center justify-center gap-1.5 transition min-h-[36px]">
-          <i data-lucide="send" class="w-3.5 h-3.5"></i> Send Card
+        <button onclick="openSingleCardModal(${m.rowIndex}, event)" class="text-xs font-medium px-4 py-2 rounded-lg ${sendBtnClass} w-full sm:w-28 flex items-center justify-center gap-1.5 transition min-h-[36px]">
+          <i data-lucide="${sendBtnIcon}" class="w-3.5 h-3.5"></i> ${sendBtnText}
         </button>
       </div>
     </div>`;
@@ -659,7 +670,6 @@ function renderMembers() {
   renderIcons();
 }
 
-// Fixed Requirement 3 and Requirement 4
 async function setPaid(rowIndex, status, event, btnElement) {
   if (event) event.stopPropagation(); // Stops the row click event from firing
 
@@ -668,7 +678,6 @@ async function setPaid(rowIndex, status, event, btnElement) {
   
   if (btnElement) {
     btnElement.disabled = true;
-    // Show spinner inside button
     const borderColorClass = status === 'Paid' ? 'border-white/30 border-t-white' : 'border-slate-500/30 border-t-slate-600';
     btnElement.innerHTML = `<span class="spinner inline-block w-4 h-4 border-[3px] ${borderColorClass}"></span>`;
   }
@@ -681,7 +690,6 @@ async function setPaid(rowIndex, status, event, btnElement) {
     cacheWrite('sk_cache_members_' + currentGroup, membersCache);
     renderMembers();
     
-    // Update Member details view if it's currently open
     if (!document.getElementById('memberPage').classList.contains('hidden')) {
       goMember(rowIndex, true);
     }
@@ -784,13 +792,11 @@ async function openStatusView(isPop = false) {
 function openModal(id) { 
   document.getElementById(id).classList.remove('hidden'); 
   renderIcons(); 
-  // Track modal natively so android back button works correctly to close it
   if (!history.state || history.state.modal !== id) {
      history.pushState({ modal: id, bg: history.state }, "", "#" + id);
   }
 }
 function closeModal(id) { 
-  // Let the popstate listener handle the actual hiding to keep URLs clean
   history.back();
 }
 
@@ -875,8 +881,9 @@ function fileToBase64(file) {
 }
 
 /* ===================================================================== SEND CARD */
-// Fix for Requirement 2: Individual Card generation.
-function openSingleCardModal(rowIndex) {
+function openSingleCardModal(rowIndex, event) {
+  if (event) event.stopPropagation();
+
   const m = membersCache.find(x => x.rowIndex === rowIndex);
   if(!m) return;
   document.getElementById('scStep1').classList.remove('hidden');
@@ -887,7 +894,6 @@ function openSingleCardModal(rowIndex) {
   document.getElementById('cardPreview').src = '';
   document.getElementById('scTargetInfo').textContent = `Target: ${m.name} · ${currentGroup}`;
   
-  // Assign target logic cleanly in the background
   const targetSelect = document.getElementById('scTarget');
   targetSelect.innerHTML = `<option value="single_${rowIndex}">${m.name}</option>`;
   targetSelect.value = `single_${rowIndex}`;
@@ -1187,6 +1193,50 @@ function normalizePhoneClient(phone) {
   return p;
 }
 
+// Requirement 1 & 2: Added Web Share API for Mobile Image+Text and Sending Tracking
+async function shareCardMobile(phone, caption, name, rowIndex) {
+  const dataUrl = document.getElementById('cardPreview').src;
+
+  // Track the button color change immediately
+  sentCardsSession.add(rowIndex);
+  renderMembers();
+
+  try {
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], `Sami-Chits-Card-${name.replace(/\s+/g,'_')}.png`, { type: blob.type });
+
+    // Web Share API natively sends files + text on mobile (Android/iOS)
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'Payment Card',
+        text: caption
+      });
+      return; // Handled smoothly by native UI
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return; // User closed the native share sheet
+    console.error('Share error:', err);
+  }
+
+  // Fallback for Desktop or unsupported devices
+  if (phone) {
+    toast('Opening WhatsApp. Please PASTE the image manually!', 'info');
+    try {
+      const canvas = document.getElementById('cardCanvas');
+      canvas.toBlob(async (blob) => {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      });
+    } catch(e) {}
+    
+    setTimeout(() => {
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(caption)}`, '_blank');
+    }, 600);
+  } else {
+    toast('Invalid phone number.', 'error');
+  }
+}
+
 async function showManualMember() {
   const m = scManualQueue[scManualIdx];
   const dataUrl = await drawCard(m);
@@ -1203,17 +1253,11 @@ async function showManualMember() {
   const amount = document.getElementById('scAmount').value;
   const monthInfo = getSelectedMonthInfo();
   const monthPart = monthInfo.valid ? ` for ${monthInfo.label}` : '';
-  const caption = `Hi ${m.name}, here is your Sami Chits payment card${monthPart} for group ${currentGroup} (Payment: ${fmtINR(amount)}). Please find the attached card image.`;
+  const caption = `Hi ${m.name}, here is your Sami Chits payment card${monthPart} for group ${currentGroup} (Payment: ${fmtINR(amount)}).`;
   
+  // Attach Share to App event handler to the button
   const waBtn = document.getElementById('scWhatsAppBtn');
-  if (phone) {
-    waBtn.href = `https://wa.me/${phone}?text=${encodeURIComponent(caption)}`;
-    waBtn.classList.remove('opacity-50', 'pointer-events-none');
-  } else {
-    waBtn.href = '#';
-    waBtn.classList.add('opacity-50', 'pointer-events-none');
-    toast(`${m.name} has an invalid WhatsApp number. Download the card instead.`, 'error');
-  }
+  waBtn.onclick = () => shareCardMobile(phone, caption, m.name, m.rowIndex);
 
   renderIcons();
 }
@@ -1234,6 +1278,23 @@ async function copyCardImage() {
   } catch (err) {
     toast('Failed to copy image.', 'error');
   }
+}
+
+async function scManualNext() {
+  if (scManualQueue[scManualIdx]) {
+    sentCardsSession.add(scManualQueue[scManualIdx].rowIndex);
+    renderMembers();
+  }
+  
+  scManualIdx++;
+  if (scManualIdx >= scManualQueue.length) {
+    document.getElementById('scManualFlow').classList.add('hidden');
+    document.getElementById('scManualDone').classList.remove('hidden');
+    document.getElementById('scManualDoneText').textContent =
+      `Done — ${scManualQueue.length} card${scManualQueue.length === 1 ? '' : 's'} generated.`;
+    return;
+  }
+  await showManualMember();
 }
 
 /* ===================================================================== UTILS */
