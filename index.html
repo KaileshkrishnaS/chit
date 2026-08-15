@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>SK Product | Chit Finance Management</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.474.0/dist/umd/lucide.min.js"></script>
@@ -15,11 +15,11 @@
   @keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
   ::-webkit-scrollbar{width:8px;height:8px}
   ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:8px}
-  .spinner{border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;width:18px;height:18px;animation:spin .7s linear infinite}
+  .spinner{border-radius:50%;animation:spin .7s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
-<body class="text-slate-800">
+<body class="text-slate-800 transition-colors">
 
 <!-- ======================= CONFIG BANNER ======================= -->
 <div id="configWarning" class="hidden bg-amber-500 text-white text-sm text-center py-2 px-4">
@@ -55,7 +55,7 @@
         </div>
         <p id="loginError" class="hidden text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
         <button type="submit" id="loginBtn"
-          class="w-full bg-indigo-600 hover:bg-indigo-700 transition text-white font-medium rounded-lg py-2.5 text-sm flex items-center justify-center gap-2">
+          class="w-full bg-indigo-600 hover:bg-indigo-700 transition text-white font-medium rounded-lg py-2.5 text-sm flex items-center justify-center gap-2 min-h-[44px]">
           <span id="loginBtnText">Login</span>
         </button>
       </form>
@@ -123,9 +123,6 @@
           <button onclick="openStatusView()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg px-4 py-2.5 sm:py-2 flex items-center justify-center gap-1.5 w-full sm:w-auto">
             <i data-lucide="pie-chart" class="w-4 h-4"></i> Payment Status
           </button>
-          <button onclick="openSendCardModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 sm:py-2 flex items-center justify-center gap-1.5 w-full sm:w-auto">
-            <i data-lucide="send" class="w-4 h-4"></i> Send Card
-          </button>
           <button onclick="openAddMemberModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg px-4 py-2.5 sm:py-2 flex items-center justify-center gap-1.5 w-full sm:w-auto">
             <i data-lucide="user-plus" class="w-4 h-4"></i> Add Member
           </button>
@@ -138,7 +135,7 @@
           <input id="memberSearch" oninput="renderMembers()" placeholder="Search by name or phone..."
             class="pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
-        <select id="memberFilter" onchange="renderMembers()" class="border border-slate-200 rounded-lg px-3 py-2 text-sm w-full sm:w-auto">
+        <select id="memberFilter" onchange="renderMembers()" class="border border-slate-200 rounded-lg px-3 py-2 text-sm w-full sm:w-auto bg-white">
           <option value="All">All</option>
           <option value="Paid">Paid</option>
           <option value="Unpaid">Unpaid</option>
@@ -156,7 +153,7 @@
 
     <!-- ---------- MEMBER DETAILS PAGE ---------- -->
     <section id="memberPage" class="hidden fade-in max-w-lg mx-auto">
-      <button onclick="goGroupFromMember()" class="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-4">
+      <button onclick="goGroupFromMember()" class="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-4 p-2 -ml-2">
         <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
       </button>
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
@@ -166,20 +163,20 @@
           <span id="mdStatus" class="mt-1 text-xs font-semibold px-2.5 py-1 rounded-full"></span>
         </div>
         <dl class="divide-y divide-slate-100 text-sm">
-          <div class="flex justify-between py-2"><dt class="text-slate-400">Phone</dt><dd id="mdPhone" class="font-medium"></dd></div>
-          <div class="flex justify-between py-2"><dt class="text-slate-400">Address</dt><dd id="mdAddress" class="font-medium text-right"></dd></div>
-          <div class="flex justify-between py-2"><dt class="text-slate-400">Reference</dt><dd id="mdReference" class="font-medium"></dd></div>
-          <div class="flex justify-between py-2"><dt class="text-slate-400">Chit Date</dt><dd id="mdChitDate" class="font-medium"></dd></div>
-          <div class="flex justify-between py-2"><dt class="text-slate-400">Group</dt><dd id="mdGroup" class="font-medium"></dd></div>
-          <div class="flex justify-between py-2"><dt class="text-slate-400">Group Amount</dt><dd id="mdGroupAmount" class="font-medium"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Phone</dt><dd id="mdPhone" class="font-medium"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Address</dt><dd id="mdAddress" class="font-medium text-right"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Reference</dt><dd id="mdReference" class="font-medium"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Chit Date</dt><dd id="mdChitDate" class="font-medium"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Group</dt><dd id="mdGroup" class="font-medium"></dd></div>
+          <div class="flex justify-between py-3"><dt class="text-slate-400">Group Amount</dt><dd id="mdGroupAmount" class="font-medium"></dd></div>
         </dl>
-        <button id="mdPaidBtn" onclick="toggleStatusFromDetails()" class="mt-5 w-full rounded-lg py-2.5 text-sm font-medium"></button>
+        <button id="mdPaidBtn" onclick="toggleStatusFromDetails(event, this)" class="mt-5 w-full rounded-lg py-3 text-sm font-medium min-h-[44px] flex items-center justify-center gap-2 transition"></button>
       </div>
     </section>
 
     <!-- ---------- PAYMENT STATUS PAGE ---------- -->
     <section id="statusPage" class="hidden fade-in">
-      <button onclick="goGroup(currentGroup)" class="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-4">
+      <button onclick="goGroup(currentGroup)" class="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1 mb-4 p-2 -ml-2">
         <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Group
       </button>
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-6">
@@ -212,22 +209,22 @@
 <!-- ======================= MODALS ======================= -->
 
 <!-- Add Group Modal -->
-<div id="addGroupModal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center px-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 scale-in">
+<div id="addGroupModal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center px-4 py-8">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 scale-in max-h-[90vh] overflow-y-auto">
     <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i data-lucide="folder-plus" class="w-5 h-5 text-indigo-600"></i> Add Group</h3>
     <form id="addGroupForm" class="space-y-3">
       <div>
         <label class="text-xs font-medium text-slate-500">Group Name</label>
-        <input id="agName" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. S1">
+        <input id="agName" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. S1">
       </div>
       <div>
         <label class="text-xs font-medium text-slate-500">Group Amount (₹)</label>
-        <input id="agAmount" type="number" min="1" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. 100000">
+        <input id="agAmount" type="number" min="1" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. 100000">
       </div>
       <p id="agError" class="hidden text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
       <div class="flex gap-2 pt-2">
-        <button type="button" onclick="closeModal('addGroupModal')" class="flex-1 border border-slate-200 rounded-lg py-2 text-sm font-medium">Cancel</button>
-        <button type="submit" id="agSubmitBtn" class="flex-1 bg-indigo-600 text-white rounded-lg py-2 text-sm font-medium flex items-center justify-center gap-2">Create</button>
+        <button type="button" onclick="closeModal('addGroupModal')" class="flex-1 border border-slate-200 rounded-lg py-2.5 text-sm font-medium">Cancel</button>
+        <button type="submit" id="agSubmitBtn" class="flex-1 bg-indigo-600 text-white rounded-lg py-2.5 text-sm font-medium flex items-center justify-center gap-2">Create</button>
       </div>
     </form>
   </div>
@@ -235,37 +232,37 @@
 
 <!-- Add Member Modal -->
 <div id="addMemberModal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center px-4 overflow-y-auto py-8">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 scale-in">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 scale-in max-h-[90vh] overflow-y-auto">
     <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><i data-lucide="user-plus" class="w-5 h-5 text-indigo-600"></i> Add Member</h3>
     <form id="addMemberForm" class="space-y-3">
       <div>
         <label class="text-xs font-medium text-slate-500">Name</label>
-        <input id="amName" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <input id="amName" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
       </div>
       <div>
         <label class="text-xs font-medium text-slate-500">Phone Number</label>
-        <input id="amPhone" required placeholder="10-digit or +country code" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <input id="amPhone" required placeholder="10-digit or +country code" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
       </div>
       <div>
         <label class="text-xs font-medium text-slate-500">Address</label>
-        <textarea id="amAddress" required rows="2" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+        <textarea id="amAddress" required rows="2" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
       </div>
       <div>
         <label class="text-xs font-medium text-slate-500">Profile Photo (optional)</label>
-        <input id="amPhoto" type="file" accept="image/*" class="mt-1 w-full text-sm">
+        <input id="amPhoto" type="file" accept="image/*" class="mt-1 w-full text-sm border border-slate-200 rounded-lg p-1.5">
       </div>
       <div>
         <label class="text-xs font-medium text-slate-500">Reference</label>
-        <input id="amReference" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <input id="amReference" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
       </div>
       <div>
         <label class="text-xs font-medium text-slate-500">Chit Date</label>
-        <input id="amChitDate" type="date" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        <input id="amChitDate" type="date" required class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
       </div>
       <p id="amError" class="hidden text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2"></p>
       <div class="flex gap-2 pt-2">
-        <button type="button" onclick="closeModal('addMemberModal')" class="flex-1 border border-slate-200 rounded-lg py-2 text-sm font-medium">Cancel</button>
-        <button type="submit" id="amSubmitBtn" class="flex-1 bg-indigo-600 text-white rounded-lg py-2 text-sm font-medium">Add Member</button>
+        <button type="button" onclick="closeModal('addMemberModal')" class="flex-1 border border-slate-200 rounded-lg py-2.5 text-sm font-medium">Cancel</button>
+        <button type="submit" id="amSubmitBtn" class="flex-1 bg-indigo-600 text-white rounded-lg py-2.5 text-sm font-medium">Add Member</button>
       </div>
     </form>
   </div>
@@ -273,58 +270,57 @@
 
 <!-- Send Card Modal -->
 <div id="sendCardModal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center px-4 overflow-y-auto py-8">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 scale-in">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 scale-in max-h-[90vh] overflow-y-auto">
     <h3 class="font-bold text-lg mb-1 flex items-center gap-2"><i data-lucide="send" class="w-5 h-5 text-emerald-600"></i> Send Payment Card</h3>
     <p class="text-xs text-slate-400 mb-4" id="scTargetInfo"></p>
     <div id="scStep1">
       <label class="text-xs font-medium text-slate-500">Payment Amount (₹)</label>
-      <input id="scAmount" type="number" min="1" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. 5000">
-      <label class="text-xs font-medium text-slate-500 mt-3 block">For Month</label>
-      <input id="scMonth" type="number" inputmode="numeric" min="1" max="12" step="1" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Enter month as a number, e.g. 8 for August">
-      <p class="text-[11px] text-slate-400 mt-1">Enter the month number (1–12). It will be shown on the card.</p>
-      <label class="text-xs font-medium text-slate-500 mt-3 block">Send to</label>
-      <select id="scTarget" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
-        <option value="all">All Members</option>
-        <option value="unpaid">Unpaid Members</option>
-        <option value="paid">Paid Members</option>
-      </select>
-      <canvas id="cardCanvas" width="700" height="440" class="hidden"></canvas>
-      <div class="mt-4 border border-slate-200 rounded-xl p-3">
+      <input id="scAmount" type="number" min="1" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="e.g. 5000">
+      <label class="text-xs font-medium text-slate-500 mt-3 block">Month</label>
+      <input id="scMonth" type="number" inputmode="numeric" min="1" max="12" step="1" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Enter month number, e.g. 8 for August">
+      
+      <!-- Hidden target select used for the individual generation logic -->
+      <div class="hidden">
+        <select id="scTarget" class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm"></select>
+      </div>
+      
+      <canvas id="cardCanvas" class="hidden"></canvas>
+      <div class="mt-4 border border-slate-200 rounded-xl p-3 bg-slate-50">
         <p class="text-xs text-slate-400 mb-2">Preview</p>
-        <img id="cardPreview" class="w-full rounded-lg border">
+        <img id="cardPreview" class="w-full rounded-lg border shadow-sm">
       </div>
       <div class="grid grid-cols-3 gap-2 pt-4">
-        <button type="button" onclick="closeModal('sendCardModal')" class="border border-slate-200 rounded-lg py-2 text-sm font-medium">Cancel</button>
-        <button type="button" onclick="previewCard()" class="border border-indigo-200 text-indigo-600 rounded-lg py-2 text-sm font-medium">Preview</button>
-        <button type="button" onclick="confirmSendCards()" id="scSendBtn" class="bg-emerald-600 text-white rounded-lg py-2 text-sm font-medium">Send</button>
+        <button type="button" onclick="closeModal('sendCardModal')" class="border border-slate-200 rounded-lg py-2.5 text-sm font-medium bg-white">Cancel</button>
+        <button type="button" onclick="previewCard()" class="border border-indigo-200 text-indigo-600 rounded-lg py-2.5 text-sm font-medium bg-white hover:bg-indigo-50">Preview</button>
+        <button type="button" onclick="confirmSendCards()" id="scSendBtn" class="bg-emerald-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-emerald-700">Send</button>
       </div>
     </div>
     <div id="scStep2" class="hidden">
-      <!-- Automatic API-send progress (used when AUTO_SEND_VIA_API = true) -->
+      <!-- Automatic API-send progress -->
       <div id="scAutoProgress" class="space-y-1.5 max-h-64 overflow-y-auto text-sm mb-4"></div>
 
-      <!-- Manual per-member WhatsApp flow (used when AUTO_SEND_VIA_API = false) -->
+      <!-- Manual per-member WhatsApp flow -->
       <div id="scManualFlow" class="hidden">
-        <p class="text-xs text-slate-400 mb-2">
-          <span id="scManualIndex">1</span> of <span id="scManualTotal">1</span> —
-          download the card, then open WhatsApp and attach it manually.
-        </p>
-        <div class="border border-slate-200 rounded-xl p-3 mb-3">
-          <img id="scManualPreview" class="w-full rounded-lg border mb-2">
+        <div class="bg-indigo-50 text-indigo-800 p-3 rounded-lg text-xs mb-3">
+          <p class="font-semibold mb-1">WhatsApp Web Limitation:</p>
+          Images cannot be auto-attached to links. Please click <b>Copy Card</b>, then open WhatsApp and <b>Paste</b> the image to send!
+        </div>
+        <div class="border border-slate-200 rounded-xl p-3 mb-3 bg-slate-50">
+          <img id="scManualPreview" class="w-full rounded-lg border shadow-sm mb-2">
           <p class="text-sm font-semibold text-slate-900" id="scManualName"></p>
           <p class="text-xs text-slate-400" id="scManualPhone"></p>
         </div>
-        <div class="grid grid-cols-2 gap-2 mb-3">
-          <a id="scDownloadBtn" download class="border border-indigo-200 text-indigo-600 rounded-lg py-2 text-sm font-medium text-center flex items-center justify-center gap-1.5">
-            <i data-lucide="download" class="w-4 h-4"></i> Download Card
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          <button type="button" onclick="copyCardImage()" class="bg-indigo-600 text-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-indigo-700 transition">
+            <i data-lucide="copy" class="w-4 h-4"></i> Copy Card
+          </button>
+          <a id="scDownloadBtn" download class="border border-slate-200 text-slate-700 bg-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-slate-50 transition">
+            <i data-lucide="download" class="w-4 h-4"></i> Download
           </a>
-          <a id="scWhatsAppBtn" target="_blank" class="bg-emerald-600 text-white rounded-lg py-2 text-sm font-medium text-center flex items-center justify-center gap-1.5">
-            <i data-lucide="message-circle" class="w-4 h-4"></i> Open WhatsApp
+          <a id="scWhatsAppBtn" target="_blank" class="bg-emerald-600 text-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-emerald-700 transition">
+            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
           </a>
         </div>
-        <button type="button" onclick="scManualNext()" id="scManualNextBtn" class="w-full bg-slate-900 text-white rounded-lg py-2 text-sm font-medium">
-          Mark Sent &amp; Next
-        </button>
       </div>
 
       <div id="scManualDone" class="hidden text-center py-4">
@@ -332,7 +328,7 @@
         <p class="font-medium text-slate-900" id="scManualDoneText"></p>
       </div>
 
-      <button type="button" onclick="closeModal('sendCardModal')" class="w-full bg-indigo-600 text-white rounded-lg py-2 text-sm font-medium mt-4">Done</button>
+      <button type="button" onclick="closeModal('sendCardModal')" class="w-full border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 rounded-lg py-2.5 text-sm font-medium mt-2">Close</button>
     </div>
   </div>
 </div>
@@ -346,12 +342,7 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynzpPAKuGwaNxn
 
 // Set to true only after you've configured WHATSAPP_TOKEN + WHATSAPP_PHONE_ID
 // as Script Properties in Apps Script (real WhatsApp Cloud API auto-send).
-// While false, "Send Card" walks you through a manual download + WhatsApp-link flow instead.
 const AUTO_SEND_VIA_API = false;
-
-// How long cached groups/members/stats stay "fresh" before we bother re-fetching from
-// Apps Script on page open. Within this window navigation is instant (cache only);
-// after it we still show the cache instantly but quietly refresh underneath.
 const CACHE_TTL_MS = 60 * 1000;
 
 /* ===================================================================== STATE */
@@ -360,14 +351,12 @@ let currentGroupAmount = 0;
 let groupsCache = [];
 let membersCache = [];
 let currentMemberRow = null;
-let selectedPhotoBase64 = '';
 
 /* ===================================================================== INIT */
-// Safe wrapper: never let a missing/blocked icon CDN break the app.
 function renderIcons() {
   try {
     if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
-  } catch (e) { /* icons are cosmetic — ignore */ }
+  } catch (e) { /* icons are cosmetic */ }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -377,36 +366,66 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   if (sessionStorage.getItem('sk_logged_in') === '1') {
     showApp();
-    goGroups();
+    // Initial routing state insertion
+    history.replaceState({ page: 'groupsPage' }, "", "#groups");
+    goGroups(true);
   }
 });
 
-/* ===================================================================== TIMED CACHE HELPERS
-   Lightweight TTL cache on top of sessionStorage. Lets already-visited pages render
-   instantly from cache (no network wait) while still refreshing quietly in the
-   background so data never goes stale for long. Does not touch the backend at all. */
+/* ===================================================================== ROUTING / BACK BUTTON
+   Requirement 3: Fix Android Back button closing the app
+   We intercept popstate and gracefully move backward through views and modals. */
+window.addEventListener('popstate', (e) => {
+  const s = e.state;
+
+  // 1. Force hide all modals first
+  ['addGroupModal', 'addMemberModal', 'sendCardModal'].forEach(id => {
+     const el = document.getElementById(id);
+     if(el) el.classList.add('hidden');
+  });
+
+  // 2. If no state, we are at the beginning. Route to groups.
+  if (!s) {
+     if (sessionStorage.getItem('sk_logged_in') === '1') {
+        history.replaceState({ page: 'groupsPage' }, "", "#groups");
+        goGroups(true);
+     }
+     return;
+  }
+
+  // 3. Render appropriately based on state stack
+  if (s.modal) {
+     document.getElementById(s.modal).classList.remove('hidden');
+  } else if (s.page === 'groupsPage') {
+     goGroups(true);
+  } else if (s.page === 'groupPage') {
+     goGroup(s.group, true);
+  } else if (s.page === 'memberPage') {
+     goMember(s.row, true);
+  } else if (s.page === 'statusPage') {
+     openStatusView(true);
+  }
+});
+
+/* ===================================================================== TIMED CACHE HELPERS */
 function cacheRead(key) {
   try {
     const raw = sessionStorage.getItem(key);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed.t !== 'number') return null;
-    return parsed; // { t: timestamp, v: value }
+    return parsed;
   } catch (e) { return null; }
 }
 function cacheWrite(key, value) {
-  try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), v: value })); } catch (e) { /* storage full/blocked — ignore */ }
+  try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), v: value })); } catch (e) {}
 }
 function cacheIsFresh(entry) {
   return !!entry && (Date.now() - entry.t) < CACHE_TTL_MS;
 }
 
 /* ===================================================================== API HELPER */
-// Only READ-ONLY actions are safe to silently retry — retrying a write (addMember,
-// addGroup, updateStatus, sendCard, uploadPhoto) could duplicate it if the first
-// attempt actually succeeded server-side but the response back to the browser failed.
 const SAFE_TO_RETRY = new Set(['login', 'getGroups', 'getMembers', 'getStats']);
-
 async function api(action, payload, _retried) {
   const canRetry = SAFE_TO_RETRY.has(action);
   let res;
@@ -416,23 +435,21 @@ async function api(action, payload, _retried) {
       body: JSON.stringify(Object.assign({ action }, payload || {}))
     });
   } catch (networkErr) {
-    // Genuine network failure (offline, blocked, CORS) — the request never left the
-    // browser, so retrying is always safe regardless of action.
     if (!_retried) { await sleep(700); return api(action, payload, true); }
-    throw new Error('Could not reach the server. Check your internet connection and that the Apps Script URL is correct.');
+    throw new Error('Could not reach the server. Check your internet connection.');
   }
 
   if (!res.ok) {
     if (canRetry && !_retried) { await sleep(700); return api(action, payload, true); }
     let detail = '';
     try { detail = (await res.text()).slice(0, 200); } catch (e) {}
-    throw new Error(`Server returned ${res.status}.${detail ? ' ' + detail : ' If this keeps happening, redeploy the Apps Script (Deploy > Manage deployments) and confirm access is set to "Anyone".'} Please check whether the action actually went through before retrying manually.`);
+    throw new Error(`Server returned ${res.status}.`);
   }
 
   try {
     return await res.json();
   } catch (parseErr) {
-    throw new Error('Server returned an unexpected response (not JSON). The Apps Script may have thrown an error — check View > Executions in the Apps Script editor.');
+    throw new Error('Server returned an unexpected response.');
   }
 }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -463,7 +480,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const err = document.getElementById('loginError');
   err.classList.add('hidden');
   btn.disabled = true;
-  btnText.innerHTML = '<span class="spinner inline-block align-middle"></span>';
+  btnText.innerHTML = '<span class="spinner inline-block w-5 h-5 border-2 border-white border-t-transparent"></span>';
   try {
     const userId = document.getElementById('loginUser').value.trim();
     const password = document.getElementById('loginPass').value;
@@ -471,7 +488,8 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     if (r.success) {
       sessionStorage.setItem('sk_logged_in', '1');
       showApp();
-      goGroups();
+      history.replaceState({ page: 'groupsPage' }, "", "#groups");
+      goGroups(true);
     } else {
       err.textContent = r.error || 'Invalid credentials.';
       err.classList.remove('hidden');
@@ -508,23 +526,23 @@ function setBreadcrumbs(items) {
   renderIcons();
 }
 
-async function goGroups() {
+async function goGroups(isPop = false) {
   hideAllPages();
   document.getElementById('groupsPage').classList.remove('hidden');
   setBreadcrumbs([{ label: 'Groups' }]);
+  
+  if (!isPop) history.pushState({ page: 'groupsPage' }, "", "#groups");
+  
   await loadGroups();
 }
 
 async function loadGroups() {
-  // Show cached data instantly (if we have it) so the page never feels blank while
-  // waiting on Apps Script's network round-trip — then refresh quietly underneath,
-  // but only actually hit the network if the cache has gone past CACHE_TTL_MS.
   const cached = cacheRead('sk_cache_groups');
   if (cached) {
     groupsCache = cached.v;
     renderGroups();
     document.getElementById('groupsLoading').classList.add('hidden');
-    if (cacheIsFresh(cached)) return; // still fresh — skip the network round-trip entirely
+    if (cacheIsFresh(cached)) return;
   } else {
     document.getElementById('groupsLoading').classList.remove('hidden');
     document.getElementById('groupsGrid').innerHTML = '';
@@ -537,7 +555,7 @@ async function loadGroups() {
     cacheWrite('sk_cache_groups', r.groups);
     renderGroups();
   } catch (ex) {
-    if (!cached) toast('Failed to load groups: ' + ex.message, 'error');
+    if (!cached) toast('Failed to load groups', 'error');
   } finally {
     document.getElementById('groupsLoading').classList.add('hidden');
   }
@@ -561,7 +579,7 @@ function renderGroups() {
   renderIcons();
 }
 
-async function goGroup(name) {
+async function goGroup(name, isPop = false) {
   currentGroup = name;
   const g = groupsCache.find(x => x.name === name);
   currentGroupAmount = g ? g.amount : 0;
@@ -570,6 +588,9 @@ async function goGroup(name) {
   document.getElementById('groupTitle').textContent = name;
   document.getElementById('groupAmountText').textContent = fmtINR(currentGroupAmount);
   setBreadcrumbs([{ label: 'Groups', fn: 'goGroups()' }, { label: name }]);
+  
+  if (!isPop) history.pushState({ page: 'groupPage', group: name }, "", "#group_" + encodeURIComponent(name));
+  
   await loadMembers();
 }
 
@@ -581,7 +602,7 @@ async function loadMembers() {
     membersCache = cached.v;
     renderMembers();
     document.getElementById('membersLoading').classList.add('hidden');
-    if (cacheIsFresh(cached)) return; // still fresh — skip the network round-trip entirely
+    if (cacheIsFresh(cached)) return;
   } else {
     document.getElementById('membersLoading').classList.remove('hidden');
     document.getElementById('membersList').innerHTML = '';
@@ -594,7 +615,7 @@ async function loadMembers() {
     cacheWrite(cacheKey, r.members);
     renderMembers();
   } catch (ex) {
-    if (!cached) toast('Failed to load members: ' + ex.message, 'error');
+    if (!cached) toast('Failed to load members', 'error');
   } finally {
     document.getElementById('membersLoading').classList.add('hidden');
   }
@@ -620,17 +641,38 @@ function renderMembers() {
         <p class="text-xs text-slate-400">${esc(m.phone)}</p>
       </div>
       <span class="text-xs font-semibold px-2 py-1 rounded-full ${paid ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">${paid ? 'PAID' : 'UNPAID'}</span>
-      <button onclick="setPaid(${m.rowIndex}, '${paid ? 'Unpaid' : 'Paid'}')"
-        class="text-xs font-medium px-3 py-1.5 rounded-lg ${paid ? 'bg-slate-100 text-slate-500' : 'bg-emerald-600 text-white'}">
-        ${paid ? 'Mark Unpaid' : 'Paid'}
-      </button>
+      
+      <div class="flex flex-col gap-1.5 shrink-0 w-full sm:w-auto mt-2 sm:mt-0">
+        <!-- Fixed Requirement 3 & 4: Corrected onclick stopping propagation and showing loading spinner -->
+        <button onclick="setPaid(${m.rowIndex}, '${paid ? 'Unpaid' : 'Paid'}', event, this)"
+          class="text-xs font-medium px-4 py-2 rounded-lg ${paid ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-emerald-600 text-white hover:bg-emerald-700'} w-full sm:w-28 text-center transition flex items-center justify-center min-h-[36px]">
+          ${paid ? 'Mark Unpaid' : 'Paid'}
+        </button>
+        <!-- Requirement 2: Individual Send Card Button -->
+        <button onclick="openSingleCardModal(${m.rowIndex})" class="text-xs font-medium px-4 py-2 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100 w-full sm:w-28 flex items-center justify-center gap-1.5 transition min-h-[36px]">
+          <i data-lucide="send" class="w-3.5 h-3.5"></i> Send Card
+        </button>
+      </div>
     </div>`;
   }).join('');
   document.getElementById('membersEmpty').classList.toggle('hidden', membersCache.length > 0);
   renderIcons();
 }
 
-async function setPaid(rowIndex, status) {
+// Fixed Requirement 3 and Requirement 4
+async function setPaid(rowIndex, status, event, btnElement) {
+  if (event) event.stopPropagation(); // Stops the row click event from firing
+
+  document.body.style.cursor = 'wait'; // Show system loading cursor
+  const originalText = btnElement ? btnElement.innerHTML : '';
+  
+  if (btnElement) {
+    btnElement.disabled = true;
+    // Show spinner inside button
+    const borderColorClass = status === 'Paid' ? 'border-white/30 border-t-white' : 'border-slate-500/30 border-t-slate-600';
+    btnElement.innerHTML = `<span class="spinner inline-block w-4 h-4 border-[3px] ${borderColorClass}"></span>`;
+  }
+
   try {
     const r = await api('updateStatus', { group: currentGroup, rowIndex, status });
     if (!r.success) throw new Error(r.error);
@@ -638,14 +680,26 @@ async function setPaid(rowIndex, status) {
     if (m) m.status = status;
     cacheWrite('sk_cache_members_' + currentGroup, membersCache);
     renderMembers();
+    
+    // Update Member details view if it's currently open
+    if (!document.getElementById('memberPage').classList.contains('hidden')) {
+      goMember(rowIndex, true);
+    }
+    
     toast(status === 'Paid' ? 'Marked as Paid' : 'Marked as Unpaid');
   } catch (ex) {
     toast('Update failed: ' + ex.message, 'error');
+    if (btnElement) {
+       btnElement.disabled = false;
+       btnElement.innerHTML = originalText;
+    }
+  } finally {
+    document.body.style.cursor = 'default';
   }
 }
 
 /* ===================================================================== MEMBER DETAILS */
-function goMember(rowIndex) {
+function goMember(rowIndex, isPop = false) {
   currentMemberRow = rowIndex;
   const m = membersCache.find(x => x.rowIndex === rowIndex);
   if (!m) return;
@@ -659,28 +713,34 @@ function goMember(rowIndex) {
   document.getElementById('mdChitDate').textContent = m.chitDate || '-';
   document.getElementById('mdGroup').textContent = currentGroup;
   document.getElementById('mdGroupAmount').textContent = fmtINR(currentGroupAmount);
+  
   const paid = m.status === 'Paid';
   const statusEl = document.getElementById('mdStatus');
   statusEl.textContent = paid ? 'PAID' : 'UNPAID';
   statusEl.className = 'mt-1 text-xs font-semibold px-2.5 py-1 rounded-full ' + (paid ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700');
+  
   const btn = document.getElementById('mdPaidBtn');
   btn.textContent = paid ? 'Mark as Unpaid' : 'Mark as Paid';
-  btn.className = 'mt-5 w-full rounded-lg py-2.5 text-sm font-medium ' + (paid ? 'bg-slate-100 text-slate-600' : 'bg-emerald-600 text-white');
+  btn.className = 'mt-5 w-full rounded-lg py-3 text-sm font-medium min-h-[44px] flex items-center justify-center gap-2 transition ' + (paid ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-emerald-600 hover:bg-emerald-700 text-white');
+  
   setBreadcrumbs([{ label: 'Groups', fn: 'goGroups()' }, { label: currentGroup, fn: `goGroup('${escAttr(currentGroup)}')` }, { label: m.name }]);
+  
+  if (!isPop) history.pushState({ page: 'memberPage', row: rowIndex }, "", "#member_" + rowIndex);
 }
 function goGroupFromMember() { goGroup(currentGroup); }
-async function toggleStatusFromDetails() {
+async function toggleStatusFromDetails(event, btnElement) {
   const m = membersCache.find(x => x.rowIndex === currentMemberRow);
   if (!m) return;
-  await setPaid(m.rowIndex, m.status === 'Paid' ? 'Unpaid' : 'Paid');
-  goMember(currentMemberRow);
+  await setPaid(m.rowIndex, m.status === 'Paid' ? 'Unpaid' : 'Paid', event, btnElement);
 }
 
 /* ===================================================================== PAYMENT STATUS PAGE */
-async function openStatusView() {
+async function openStatusView(isPop = false) {
   hideAllPages();
   document.getElementById('statusPage').classList.remove('hidden');
   setBreadcrumbs([{ label: 'Groups', fn: 'goGroups()' }, { label: currentGroup, fn: `goGroup('${escAttr(currentGroup)}')` }, { label: 'Payment Status' }]);
+  
+  if (!isPop) history.pushState({ page: 'statusPage' }, "", "#status");
 
   const renderStats = (r) => {
     document.getElementById('statTotal').textContent = r.total;
@@ -691,8 +751,6 @@ async function openStatusView() {
     document.getElementById('statBarText').textContent = `${r.paid} / ${r.total} Paid`;
   };
 
-  // Same instant-cache-then-refresh treatment as Groups/Members so this page doesn't
-  // sit blank waiting on the network every time it's opened.
   const statsCacheKey = 'sk_cache_stats_' + currentGroup;
   const cachedStats = cacheRead(statsCacheKey);
   let skipNetwork = false;
@@ -708,7 +766,7 @@ async function openStatusView() {
         cacheWrite(statsCacheKey, r);
       }
     } catch (ex) {
-      if (!cachedStats) toast('Failed to load stats: ' + ex.message, 'error');
+      if (!cachedStats) toast('Failed to load stats', 'error');
     }
   }
 
@@ -720,6 +778,20 @@ async function openStatusView() {
     </div>`;
   document.getElementById('paidList').innerHTML = paid.map(row).join('') || '<p class="text-xs text-slate-400">None</p>';
   document.getElementById('unpaidList').innerHTML = unpaid.map(row).join('') || '<p class="text-xs text-slate-400">None</p>';
+}
+
+/* ===================================================================== MODAL LOGIC */
+function openModal(id) { 
+  document.getElementById(id).classList.remove('hidden'); 
+  renderIcons(); 
+  // Track modal natively so android back button works correctly to close it
+  if (!history.state || history.state.modal !== id) {
+     history.pushState({ modal: id, bg: history.state }, "", "#" + id);
+  }
+}
+function closeModal(id) { 
+  // Let the popstate listener handle the actual hiding to keep URLs clean
+  history.back();
 }
 
 /* ===================================================================== ADD GROUP */
@@ -735,7 +807,7 @@ document.getElementById('addGroupForm').addEventListener('submit', async (e) => 
   const name = document.getElementById('agName').value.trim();
   const amount = document.getElementById('agAmount').value;
   const btn = document.getElementById('agSubmitBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner inline-block"></span>';
+  btn.disabled = true; btn.innerHTML = '<span class="spinner inline-block w-5 h-5 border-2 border-white border-t-transparent"></span>';
   try {
     const r = await api('addGroup', { name, amount });
     if (!r.success) { err.textContent = r.error; err.classList.remove('hidden'); return; }
@@ -803,19 +875,26 @@ function fileToBase64(file) {
 }
 
 /* ===================================================================== SEND CARD */
-function openSendCardModal() {
+// Fix for Requirement 2: Individual Card generation.
+function openSingleCardModal(rowIndex) {
+  const m = membersCache.find(x => x.rowIndex === rowIndex);
+  if(!m) return;
   document.getElementById('scStep1').classList.remove('hidden');
   document.getElementById('scStep2').classList.add('hidden');
   document.getElementById('scAmount').value = '';
   const now = new Date();
-  document.getElementById('scMonth').value = now.getMonth() + 1; // integer 1-12, current month by default
+  document.getElementById('scMonth').value = now.getMonth() + 1; 
   document.getElementById('cardPreview').src = '';
-  document.getElementById('scTargetInfo').textContent = `Group: ${currentGroup} · ${fmtINR(currentGroupAmount)}`;
+  document.getElementById('scTargetInfo').textContent = `Target: ${m.name} · ${currentGroup}`;
+  
+  // Assign target logic cleanly in the background
+  const targetSelect = document.getElementById('scTarget');
+  targetSelect.innerHTML = `<option value="single_${rowIndex}">${m.name}</option>`;
+  targetSelect.value = `single_${rowIndex}`;
+
   openModal('sendCardModal');
 }
 
-// Validates the "For Month" field and returns { valid, month, label } where month is the
-// raw integer (1-12) and label is e.g. "August 2026" for display on the card.
 function getSelectedMonthInfo() {
   const raw = document.getElementById('scMonth').value;
   const month = parseInt(raw, 10);
@@ -823,14 +902,10 @@ function getSelectedMonthInfo() {
     return { valid: false, month: null, label: '' };
   }
   const now = new Date();
-  // Card always reflects the current year alongside the chosen month number.
   const label = `${MONTH_NAMES[month - 1]} ${now.getFullYear()}`;
   return { valid: true, month, label };
 }
 
-// Loads an image for canvas use; resolves null (not throws) if missing, blocked, or CORS-restricted
-// — most importantly Google Drive links usually lack CORS headers, so this quietly falls back
-// to an initials avatar rather than breaking card generation.
 function loadImageForCanvas(url) {
   return new Promise((resolve) => {
     if (!url) return resolve(null);
@@ -865,11 +940,14 @@ function formatDateNice(d) {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+// Requirement 1: Complete Layout Redesign (Spacious 2-column minimal layout)
 async function drawCard(member) {
   const m = typeof member === 'string' ? { name: member, photoUrl: '' } : (member || { name: 'Member Name', photoUrl: '' });
   const canvas = document.getElementById('cardCanvas');
-  const W = canvas.width, H = canvas.height;
+  const W = 700, H = 480; 
+  canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
+  
   const amount = Number(document.getElementById('scAmount').value) || 0;
   const dateStr = formatDateNice(new Date());
   const monthInfo = getSelectedMonthInfo();
@@ -877,176 +955,147 @@ async function drawCard(member) {
 
   ctx.clearRect(0, 0, W, H);
 
-  // ---- outer card with soft shadow ----
+  // 1. Outer Box & Background White Base
   ctx.save();
-  ctx.shadowColor = 'rgba(15,23,42,0.22)';
-  ctx.shadowBlur = 28;
-  ctx.shadowOffsetY = 10;
   ctx.fillStyle = '#ffffff';
-  roundRectPath(ctx, 14, 14, W - 28, H - 28, 22);
+  roundRectPath(ctx, 0, 0, W, H, 16);
   ctx.fill();
-  ctx.restore();
-
-  ctx.save();
-  roundRectPath(ctx, 14, 14, W - 28, H - 28, 22);
   ctx.clip();
 
-  // subtle body backdrop gradient for depth
-  const bodyGrad = ctx.createLinearGradient(0, 92, 0, H);
-  bodyGrad.addColorStop(0, '#ffffff');
-  bodyGrad.addColorStop(1, '#f8fafc');
-  ctx.fillStyle = bodyGrad;
-  ctx.fillRect(14, 14, W - 28, H - 28);
+  // 2. Faint Watermarks & Corner Circles for depth
+  ctx.beginPath();
+  ctx.arc(0, H + 20, 180, 0, Math.PI * 2);
+  ctx.fillStyle = '#f8fafc';
+  ctx.fill();
+  
+  ctx.beginPath();
+  ctx.arc(W, H, 240, 0, Math.PI * 2);
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fill();
 
-  // decorative soft circles in the background for visual richness
   ctx.save();
-  ctx.globalAlpha = 0.06;
-  ctx.fillStyle = '#4f46e5';
-  ctx.beginPath(); ctx.arc(W - 30, H - 40, 130, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(10, H - 10, 70, 0, Math.PI * 2); ctx.fill();
-  ctx.restore();
-
-  // faint diagonal watermark
-  ctx.save();
-  ctx.globalAlpha = 0.035;
-  ctx.fillStyle = '#312e81';
-  ctx.font = 'bold 90px Segoe UI, Arial';
-  ctx.translate(W / 2, H / 2 + 40);
-  ctx.rotate(-0.35);
+  ctx.globalAlpha = 0.04;
+  ctx.fillStyle = '#64748b';
+  ctx.font = '900 120px "Segoe UI", sans-serif';
+  ctx.translate(W / 2 + 30, H / 2 + 50);
+  ctx.rotate(-0.25);
   ctx.textAlign = 'center';
   ctx.fillText('SAMI CHITS', 0, 0);
   ctx.restore();
 
-  // ---- header banner ----
-  const grad = ctx.createLinearGradient(0, 0, W, 100);
-  grad.addColorStop(0, '#312e81'); grad.addColorStop(0.55, '#4338ca'); grad.addColorStop(1, '#6366f1');
+  // 3. Top Header Banner (Gradient Blue/Purple)
+  const grad = ctx.createLinearGradient(0, 0, W, 110);
+  grad.addColorStop(0, '#2e3192'); // Deep blue
+  grad.addColorStop(1, '#5b54fa'); // Lighter purple
   ctx.fillStyle = grad;
-  ctx.fillRect(14, 14, W - 28, 100);
-
-  // thin gold-toned accent line under the header for a premium touch
-  const accentGrad = ctx.createLinearGradient(14, 0, W - 14, 0);
-  accentGrad.addColorStop(0, '#fbbf24'); accentGrad.addColorStop(0.5, '#fde68a'); accentGrad.addColorStop(1, '#fbbf24');
-  ctx.fillStyle = accentGrad;
-  ctx.fillRect(14, 112, W - 28, 4);
-
-  // header decorative rings
+  ctx.fillRect(0, 0, W, 110);
+  
+  // Decorative faint rings in header
   ctx.save();
-  ctx.globalAlpha = 0.15;
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(60, 30, 70, 0, Math.PI * 2); ctx.stroke();
-  ctx.beginPath(); ctx.arc(60, 30, 95, 0, Math.PI * 2); ctx.stroke();
+  ctx.globalAlpha = 0.1;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(80, 30, 80, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(80, 30, 110, 0, Math.PI*2); ctx.stroke();
   ctx.restore();
 
+  // 4. Gold Divider Line
+  ctx.fillStyle = '#fbbd08';
+  ctx.fillRect(0, 110, W, 4);
+
+  // 5. Header Texts (SAMI CHITS)
   ctx.fillStyle = '#ffffff';
   ctx.textAlign = 'left';
-  ctx.font = 'bold 30px Segoe UI, Arial';
+  ctx.font = '900 36px "Segoe UI", sans-serif';
   ctx.fillText('SAMI CHITS', 40, 56);
-  ctx.font = '600 12px Segoe UI, Arial';
-  ctx.globalAlpha = 0.9;
-  ctx.fillText('P A Y M E N T   C A R D', 40, 80);
-  ctx.globalAlpha = 1;
+  
+  ctx.font = '600 14px "Segoe UI", sans-serif';
+  ctx.fillText('P A Y M E N T   C A R D', 40, 84);
 
-  // member photo / initials avatar, top-right, with a bright ring
-  const cx = W - 120, cy = 62, r = 46;
-  ctx.save();
+  // 6. Right Aligned Circular Avatar
+  const avCx = W - 90, avCy = 110, avR = 46;
+  
+  // Gold Ring
   ctx.beginPath();
-  ctx.arc(cx, cy, r + 6, 0, Math.PI * 2);
-  const ringGrad = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
-  ringGrad.addColorStop(0, '#fde68a'); ringGrad.addColorStop(1, '#fbbf24');
-  ctx.fillStyle = ringGrad;
+  ctx.arc(avCx, avCy, avR + 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#fbbd08';
   ctx.fill();
+  
+  // Inner Purple Circle
   ctx.beginPath();
-  ctx.arc(cx, cy, r + 2, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff';
+  ctx.arc(avCx, avCy, avR, 0, Math.PI * 2);
+  ctx.fillStyle = '#5b54fa';
   ctx.fill();
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.closePath();
   ctx.clip();
+
   if (photoImg) {
-    // cover-fit the image into the circle
     const iw = photoImg.width, ih = photoImg.height;
-    const scale = Math.max((r * 2) / iw, (r * 2) / ih);
+    const scale = Math.max((avR * 2) / iw, (avR * 2) / ih);
     const dw = iw * scale, dh = ih * scale;
-    ctx.drawImage(photoImg, cx - dw / 2, cy - dh / 2, dw, dh);
+    ctx.drawImage(photoImg, avCx - dw / 2, avCy - dh / 2, dw, dh);
   } else {
-    const ag = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
-    ag.addColorStop(0, '#818cf8'); ag.addColorStop(1, '#4338ca');
-    ctx.fillStyle = ag;
-    ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 30px Segoe UI, Arial';
+    ctx.font = 'bold 38px "Segoe UI", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(getInitials(m.name), cx, cy + 2);
+    ctx.fillText(getInitials(m.name)[0] || 'M', avCx, avCy + 3);
     ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
   }
   ctx.restore();
 
-  // ---- info rows (now includes the For Month field) ----
-  ctx.textAlign = 'left';
-  const rows = [
-    ['Member Name', m.name || '-'],
-    ['Group', currentGroup || '-'],
-    ['For Month', monthInfo.valid ? monthInfo.label : '-'],
-    ['Group Amount', fmtINR(currentGroupAmount)],
-    ['Payment Amount', fmtINR(amount)],
-    ['Date', dateStr]
-  ];
-  let y = 152;
-  const rowGap = (H - 152 - 58) / rows.length; // leaves room for footer, never overlaps it
-  rows.forEach(([label, val], idx) => {
-    // faint alternating row backdrop strip for readability
-    if (idx % 2 === 0) {
-      ctx.save();
-      ctx.globalAlpha = 0.5;
-      ctx.fillStyle = '#eef2ff';
-      ctx.fillRect(30, y - 24, W - 60, rowGap - 4);
-      ctx.restore();
-    }
-    ctx.fillStyle = '#818cf8';
-    ctx.font = '600 11px Segoe UI, Arial';
-    ctx.fillText(label.toUpperCase(), 44, y - 4);
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 20px Segoe UI, Arial';
-    ctx.fillText(val, 44, y + 19);
-    y += rowGap;
-  });
+  // 7. Clean 2-Column Grid Layout (Using full width)
+  ctx.fillStyle = '#818cf8'; 
+  ctx.font = '600 12px "Segoe UI", sans-serif';
+  
+  // Labels Left
+  ctx.fillText('MEMBER NAME', 40, 160);
+  ctx.fillText('MONTH', 40, 255); // Requirement 2
+  ctx.fillText('PAYMENT AMOUNT', 40, 350);
+  
+  // Labels Right
+  ctx.fillText('GROUP', 350, 160);
+  ctx.fillText('GROUP AMOUNT', 350, 255);
+  ctx.fillText('DATE', 350, 350);
 
-  // ---- gold accent divider + footer ----
-  const footerY = H - 44;
-  const fgrad = ctx.createLinearGradient(40, 0, W - 40, 0);
-  fgrad.addColorStop(0, '#e2e8f0'); fgrad.addColorStop(0.5, '#c7cef7'); fgrad.addColorStop(1, '#e2e8f0');
-  ctx.strokeStyle = fgrad;
-  ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(40, footerY); ctx.lineTo(W - 40, footerY); ctx.stroke();
+  // Values Left
+  ctx.fillStyle = '#1e293b'; 
+  ctx.font = 'bold 26px "Segoe UI", sans-serif';
+  ctx.fillText(m.name || '-', 40, 190);
+  ctx.fillText(monthInfo.valid ? monthInfo.label : '-', 40, 285); // Requirement 2 (No rupee)
+  
+  // Payment Amount extra bold/color
+  ctx.fillStyle = '#2e3192'; 
+  ctx.font = '900 32px "Segoe UI", sans-serif';
+  ctx.fillText(fmtINR(amount), 40, 385);
 
-  // small badge icon (checkmark seal) beside footer text for a polished finish
-  ctx.save();
-  ctx.beginPath(); ctx.arc(W / 2 - 108, footerY + 18, 7, 0, Math.PI * 2);
-  ctx.fillStyle = '#4f46e5'; ctx.fill();
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.4;
-  ctx.beginPath();
-  ctx.moveTo(W / 2 - 111, footerY + 18);
-  ctx.lineTo(W / 2 - 109, footerY + 20.5);
-  ctx.lineTo(W / 2 - 105, footerY + 15);
-  ctx.stroke();
-  ctx.restore();
+  // Values Right
+  ctx.fillStyle = '#1e293b'; 
+  ctx.font = 'bold 26px "Segoe UI", sans-serif';
+  ctx.fillText(currentGroup || '-', 350, 190);
+  ctx.fillText(fmtINR(currentGroupAmount), 350, 285);
+  ctx.fillText(dateStr, 350, 385);
 
+  // 8. Footer Checkmark & Text
   ctx.fillStyle = '#94a3b8';
-  ctx.font = '11px Segoe UI, Arial';
+  ctx.font = '10px "Segoe UI", sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Generated by Sami Chits · Chit Finance Management', W / 2 + 6, footerY + 22);
+  ctx.fillText('Generated by Sami Chits · Chit Finance Management', W / 2, H - 15);
 
-  ctx.restore(); // release clip
+  ctx.beginPath();
+  ctx.arc(W / 2 - 134, H - 18, 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#5b54fa';
+  ctx.fill();
+  
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(W / 2 - 136, H - 18);
+  ctx.lineTo(W / 2 - 134.5, H - 16);
+  ctx.lineTo(W / 2 - 131.5, H - 21);
+  ctx.stroke();
 
-  try {
-    return canvas.toDataURL('image/png');
-  } catch (e) {
-    // extremely rare: a photo tainted the canvas despite CORS checks — redraw without it
-    return await drawCard({ ...m, photoUrl: '' });
-  }
+  return canvas.toDataURL('image/png');
 }
 
 async function previewCard() {
@@ -1059,8 +1108,10 @@ async function previewCard() {
 
 function getTargetMembers() {
   const t = document.getElementById('scTarget').value;
-  if (t === 'paid') return membersCache.filter(m => m.status === 'Paid');
-  if (t === 'unpaid') return membersCache.filter(m => m.status !== 'Paid');
+  if (t.startsWith('single_')) {
+    const idx = parseInt(t.split('_')[1], 10);
+    return membersCache.filter(m => m.rowIndex === idx);
+  }
   return membersCache;
 }
 
@@ -1069,7 +1120,7 @@ async function confirmSendCards() {
   if (!amount || Number(amount) <= 0) { toast('Enter a valid payment amount', 'error'); return; }
   if (!getSelectedMonthInfo().valid) { toast('Enter a valid month number (1-12)', 'error'); return; }
   const targets = getTargetMembers();
-  if (!targets.length) { toast('No members match this target', 'error'); return; }
+  if (!targets.length) { toast('No target member found', 'error'); return; }
 
   document.getElementById('scStep1').classList.add('hidden');
   document.getElementById('scStep2').classList.remove('hidden');
@@ -1081,7 +1132,7 @@ async function confirmSendCards() {
   }
 }
 
-/* ---- Automatic send via WhatsApp Cloud API (requires backend credentials configured) ---- */
+/* ---- Automatic send via WhatsApp Cloud API ---- */
 async function runAutoSend(targets) {
   document.getElementById('scAutoProgress').classList.remove('hidden');
   document.getElementById('scManualFlow').classList.add('hidden');
@@ -1103,7 +1154,7 @@ async function runAutoSend(targets) {
         caption: `Payment card for ${m.name} · ${currentGroup}`
       });
       if (r.success) {
-        row.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i> <span>${esc(m.name)}${r.demo ? ' — generated (demo mode, WhatsApp not configured)' : ' — sent'}</span>`;
+        row.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i> <span>${esc(m.name)}${r.demo ? ' — generated (demo mode)' : ' — sent'}</span>`;
       } else {
         row.innerHTML = `<i data-lucide="x-circle" class="w-4 h-4 text-red-600"></i> <span>${esc(m.name)} — ${esc(r.error || 'failed')}</span>`;
       }
@@ -1114,7 +1165,7 @@ async function runAutoSend(targets) {
   }
 }
 
-/* ---- Manual flow: download card + open a pre-filled WhatsApp chat, one member at a time ---- */
+/* ---- Manual flow ---- */
 let scManualQueue = [];
 let scManualIdx = 0;
 
@@ -1124,7 +1175,6 @@ async function runManualSend(targets) {
   document.getElementById('scManualFlow').classList.remove('hidden');
   scManualQueue = targets;
   scManualIdx = 0;
-  document.getElementById('scManualTotal').textContent = targets.length;
   await showManualMember();
 }
 
@@ -1132,16 +1182,15 @@ function normalizePhoneClient(phone) {
   let p = String(phone || '').replace(/[^\d+]/g, '');
   if (!p) return null;
   if (p.startsWith('+')) p = p.substring(1);
-  if (p.length === 10) p = '91' + p; // default India country code, same as backend
+  if (p.length === 10) p = '91' + p;
   if (p.length < 10) return null;
   return p;
 }
 
 async function showManualMember() {
   const m = scManualQueue[scManualIdx];
-  document.getElementById('scManualIndex').textContent = scManualIdx + 1;
-
   const dataUrl = await drawCard(m);
+  
   document.getElementById('scManualPreview').src = dataUrl;
   document.getElementById('scManualName').textContent = m.name;
   document.getElementById('scManualPhone').textContent = m.phone;
@@ -1155,6 +1204,7 @@ async function showManualMember() {
   const monthInfo = getSelectedMonthInfo();
   const monthPart = monthInfo.valid ? ` for ${monthInfo.label}` : '';
   const caption = `Hi ${m.name}, here is your Sami Chits payment card${monthPart} for group ${currentGroup} (Payment: ${fmtINR(amount)}). Please find the attached card image.`;
+  
   const waBtn = document.getElementById('scWhatsAppBtn');
   if (phone) {
     waBtn.href = `https://wa.me/${phone}?text=${encodeURIComponent(caption)}`;
@@ -1162,29 +1212,31 @@ async function showManualMember() {
   } else {
     waBtn.href = '#';
     waBtn.classList.add('opacity-50', 'pointer-events-none');
-    toast(`${m.name} has an invalid WhatsApp number — skip this one`, 'error');
+    toast(`${m.name} has an invalid WhatsApp number. Download the card instead.`, 'error');
   }
 
-  document.getElementById('scManualNextBtn').textContent =
-    scManualIdx === scManualQueue.length - 1 ? 'Finish' : 'Mark Sent & Next';
   renderIcons();
 }
 
-async function scManualNext() {
-  scManualIdx++;
-  if (scManualIdx >= scManualQueue.length) {
-    document.getElementById('scManualFlow').classList.add('hidden');
-    document.getElementById('scManualDone').classList.remove('hidden');
-    document.getElementById('scManualDoneText').textContent =
-      `Done — ${scManualQueue.length} card${scManualQueue.length === 1 ? '' : 's'} generated for ${currentGroup}.`;
-    return;
+async function copyCardImage() {
+  try {
+    const canvas = document.getElementById('cardCanvas');
+    canvas.toBlob(async (blob) => {
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+        toast('Card copied! Click WhatsApp and Paste to send.', 'success');
+      } catch (err) {
+        toast('Clipboard access denied. Please click Download instead.', 'error');
+      }
+    }, 'image/png');
+  } catch (err) {
+    toast('Failed to copy image.', 'error');
   }
-  await showManualMember();
 }
 
-/* ===================================================================== MODAL HELPERS */
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); renderIcons(); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+/* ===================================================================== UTILS */
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function escAttr(s) { return String(s).replace(/'/g, "\\'"); }
 </script>
