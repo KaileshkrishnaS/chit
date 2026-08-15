@@ -302,8 +302,8 @@
       <!-- Manual per-member WhatsApp flow -->
       <div id="scManualFlow" class="hidden">
         <div class="bg-indigo-50 text-indigo-800 p-3 rounded-lg text-xs mb-3">
-          <p class="font-semibold mb-1">How to Send:</p>
-          On mobile, click <b>Share to App</b> to send both the image and text. On PC, it will copy the image so you can Paste it in WhatsApp!
+          <p class="font-semibold mb-1">Important:</p>
+          WhatsApp blocks sending images automatically via links. When you click <b>WhatsApp</b>, we will auto-download the card and open the chat. Please <b>Attach</b> the card from your gallery!
         </div>
         <div class="border border-slate-200 rounded-xl p-3 mb-3 bg-slate-50">
           <img id="scManualPreview" class="w-full rounded-lg border shadow-sm mb-2">
@@ -317,9 +317,8 @@
           <a id="scDownloadBtn" download class="border border-slate-200 text-slate-700 bg-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-slate-50 transition">
             <i data-lucide="download" class="w-4 h-4"></i> Download
           </a>
-          <!-- Fixed Requirement 1: Call Web Share API for Mobile Image + Text -->
           <button type="button" id="scWhatsAppBtn" class="bg-emerald-600 text-white rounded-lg py-3 text-xs font-medium text-center flex flex-col items-center justify-center gap-1 hover:bg-emerald-700 transition">
-            <i data-lucide="share-2" class="w-4 h-4"></i> Share to App
+            <i data-lucide="message-circle" class="w-4 h-4"></i> WhatsApp
           </button>
         </div>
       </div>
@@ -376,8 +375,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-/* ===================================================================== ROUTING / BACK BUTTON
-   Requirement 3: Fix Android Back button closing the app */
+/* ===================================================================== ROUTING / BACK BUTTON */
 window.addEventListener('popstate', (e) => {
   const s = e.state;
 
@@ -832,7 +830,6 @@ document.getElementById('addGroupForm').addEventListener('submit', async (e) => 
 function openAddMemberModal() {
   document.getElementById('addMemberForm').reset();
   document.getElementById('amError').classList.add('hidden');
-  selectedPhotoBase64 = '';
   openModal('addMemberModal');
 }
 document.getElementById('addMemberForm').addEventListener('submit', async (e) => {
@@ -946,7 +943,6 @@ function formatDateNice(d) {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-// Requirement 1: Complete Layout Redesign (Spacious 2-column minimal layout)
 async function drawCard(member) {
   const m = typeof member === 'string' ? { name: member, photoUrl: '' } : (member || { name: 'Member Name', photoUrl: '' });
   const canvas = document.getElementById('cardCanvas');
@@ -1021,13 +1017,11 @@ async function drawCard(member) {
   // 6. Right Aligned Circular Avatar
   const avCx = W - 90, avCy = 110, avR = 46;
   
-  // Gold Ring
   ctx.beginPath();
   ctx.arc(avCx, avCy, avR + 4, 0, Math.PI * 2);
   ctx.fillStyle = '#fbbd08';
   ctx.fill();
   
-  // Inner Purple Circle
   ctx.beginPath();
   ctx.arc(avCx, avCy, avR, 0, Math.PI * 2);
   ctx.fillStyle = '#5b54fa';
@@ -1054,28 +1048,23 @@ async function drawCard(member) {
   ctx.fillStyle = '#818cf8'; 
   ctx.font = '600 12px "Segoe UI", sans-serif';
   
-  // Labels Left
   ctx.fillText('MEMBER NAME', 40, 160);
-  ctx.fillText('MONTH', 40, 255); // Requirement 2
+  ctx.fillText('MONTH', 40, 255); 
   ctx.fillText('PAYMENT AMOUNT', 40, 350);
   
-  // Labels Right
   ctx.fillText('GROUP', 350, 160);
   ctx.fillText('GROUP AMOUNT', 350, 255);
   ctx.fillText('DATE', 350, 350);
 
-  // Values Left
   ctx.fillStyle = '#1e293b'; 
   ctx.font = 'bold 26px "Segoe UI", sans-serif';
   ctx.fillText(m.name || '-', 40, 190);
-  ctx.fillText(monthInfo.valid ? monthInfo.label : '-', 40, 285); // Requirement 2 (No rupee)
+  ctx.fillText(monthInfo.valid ? monthInfo.label : '-', 40, 285); 
   
-  // Payment Amount extra bold/color
   ctx.fillStyle = '#2e3192'; 
   ctx.font = '900 32px "Segoe UI", sans-serif';
   ctx.fillText(fmtINR(amount), 40, 385);
 
-  // Values Right
   ctx.fillStyle = '#1e293b'; 
   ctx.font = 'bold 26px "Segoe UI", sans-serif';
   ctx.fillText(currentGroup || '-', 350, 190);
@@ -1193,48 +1182,33 @@ function normalizePhoneClient(phone) {
   return p;
 }
 
-// Requirement 1 & 2: Added Web Share API for Mobile Image+Text and Sending Tracking
-async function shareCardMobile(phone, caption, name, rowIndex) {
+// Fixed Requirement 1 & 2: Sending directly via Native Share API / auto-download
+async function sendToWhatsApp(phone, caption, name, rowIndex) {
   const dataUrl = document.getElementById('cardPreview').src;
 
-  // Track the button color change immediately
+  // Requirement 2: Track button color change instantly
   sentCardsSession.add(rowIndex);
   renderMembers();
 
-  try {
-    const blob = await (await fetch(dataUrl)).blob();
-    const file = new File([blob], `Sami-Chits-Card-${name.replace(/\s+/g,'_')}.png`, { type: blob.type });
-
-    // Web Share API natively sends files + text on mobile (Android/iOS)
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: 'Payment Card',
-        text: caption
-      });
-      return; // Handled smoothly by native UI
-    }
-  } catch (err) {
-    if (err.name === 'AbortError') return; // User closed the native share sheet
-    console.error('Share error:', err);
+  if (!phone) {
+    toast('Invalid WhatsApp number. Please download the card manually.', 'error');
+    return;
   }
 
-  // Fallback for Desktop or unsupported devices
-  if (phone) {
-    toast('Opening WhatsApp. Please PASTE the image manually!', 'info');
-    try {
-      const canvas = document.getElementById('cardCanvas');
-      canvas.toBlob(async (blob) => {
-        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-      });
-    } catch(e) {}
-    
-    setTimeout(() => {
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(caption)}`, '_blank');
-    }, 600);
-  } else {
-    toast('Invalid phone number.', 'error');
-  }
+  // Auto-download the image first so it's readily available to attach
+  const dlLink = document.createElement('a');
+  dlLink.href = dataUrl;
+  dlLink.download = `Sami-Chits-Card-${(name || 'member').replace(/[^a-z0-9]/gi, '_')}.png`;
+  document.body.appendChild(dlLink);
+  dlLink.click();
+  document.body.removeChild(dlLink);
+
+  toast('Card downloaded! Opening chat...', 'info');
+
+  // Open direct WhatsApp DM (Mobile or Web)
+  setTimeout(() => {
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(caption)}`, '_blank');
+  }, 800);
 }
 
 async function showManualMember() {
@@ -1255,9 +1229,9 @@ async function showManualMember() {
   const monthPart = monthInfo.valid ? ` for ${monthInfo.label}` : '';
   const caption = `Hi ${m.name}, here is your Sami Chits payment card${monthPart} for group ${currentGroup} (Payment: ${fmtINR(amount)}).`;
   
-  // Attach Share to App event handler to the button
+  // Attach Direct WhatsApp logic
   const waBtn = document.getElementById('scWhatsAppBtn');
-  waBtn.onclick = () => shareCardMobile(phone, caption, m.name, m.rowIndex);
+  waBtn.onclick = () => sendToWhatsApp(phone, caption, m.name, m.rowIndex);
 
   renderIcons();
 }
@@ -1278,23 +1252,6 @@ async function copyCardImage() {
   } catch (err) {
     toast('Failed to copy image.', 'error');
   }
-}
-
-async function scManualNext() {
-  if (scManualQueue[scManualIdx]) {
-    sentCardsSession.add(scManualQueue[scManualIdx].rowIndex);
-    renderMembers();
-  }
-  
-  scManualIdx++;
-  if (scManualIdx >= scManualQueue.length) {
-    document.getElementById('scManualFlow').classList.add('hidden');
-    document.getElementById('scManualDone').classList.remove('hidden');
-    document.getElementById('scManualDoneText').textContent =
-      `Done — ${scManualQueue.length} card${scManualQueue.length === 1 ? '' : 's'} generated.`;
-    return;
-  }
-  await showManualMember();
 }
 
 /* ===================================================================== UTILS */
